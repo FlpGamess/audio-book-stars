@@ -1,0 +1,96 @@
+//import "./style.css";
+//sempre tem q ter letra maiuscula
+/*import Trash from "../../assets/trash.jpg";
+import { use } from "react";
+
+function Home() {
+  const users = [
+    {
+      id: "54654cds4f",
+      name: "Rodolfo",
+      age: 45,
+      email: "rodpanca@gmail.com",
+    },
+    {
+      id: "48sd484ff",
+      name: "Luna",
+      age: 19,
+      email: "cryluna@gmail.com",
+    },
+    {
+      id: "48gvfrdegre",
+      name: "Willian",
+      age: 59,
+      email: "KovirWillian@gmail.com",
+    },
+  ];
+  return (
+    <div className="container">
+      <form>
+        <h1>Cadastro de Usuarios</h1>
+        <input placeholder="Nome" name="nome" type="text" />
+        <input placeholder="Idade" name="idade" type="number" />
+        <input placeholder="E-mail" name="email" type="email" />
+        <button type="button"> Cadastrar</button>
+      </form>
+      {users.map((CascadBala) => (
+        <div key={CascadBala.id} className="card">
+          <div>
+            <p>Nome:<span>{CascadBala.name}</span></p>
+            <p>Idade:<span>{CascadBala.age}</span></p>
+            <p>Email:<span>{CascadBala.email}</span></p>
+          </div>
+          <button>
+            <img src={Trash} style={{ width: "24px", height: "24px" }} />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default Home;
+*/
+import React, { useState } from "react";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import FiltroCategoriaDialog from "./teste";
+
+const TabelaComFiltroDialog = () => {
+  const dadosOriginais = [
+    { id: 1, nome: "Pizza", categoria: "Comida" },
+    { id: 2, nome: "Refrigerante", categoria: "Bebida" },
+    { id: 3, nome: "Sushi", categoria: "Comida" },
+    { id: 4, nome: "Suco", categoria: "Bebida" },
+    { id: 5, nome: "Lasanha", categoria: "Comida" },
+  ];
+
+  const [categoriaFiltrada, setCategoriaFiltrada] = useState(null);
+
+  const dadosFiltrados = categoriaFiltrada
+    ? dadosOriginais.filter((item) => item.categoria === categoriaFiltrada)
+    : dadosOriginais;
+
+  return (
+    <div className="p-4 min-h-screen bg-gray-100">
+      <h2 className="text-xl font-semibold mb-4">
+        Tabela com Filtro (Componente Separado)
+      </h2>
+
+      <FiltroCategoriaDialog onFiltrar={setCategoriaFiltrada} />
+
+      <DataTable
+        value={dadosFiltrados}
+        paginator
+        rows={5}
+        responsiveLayout="scroll"
+      >
+        <Column field="id" header="ID" />
+        <Column field="nome" header="Nome" />
+        <Column field="categoria" header="Categoria" />
+      </DataTable>
+    </div>
+  );
+};
+
+export default TabelaComFiltroDialog;
