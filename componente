@@ -1,0 +1,66 @@
+import React, { useState } from "react";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { Button } from "primereact/button";
+
+const FiltroCategoriaDialog = ({ onFiltrar }) => {
+  const [visible, setVisible] = useState(false);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
+
+  const categorias = [
+    { label: "Todas", value: null },
+    { label: "Comida", value: "Comida" },
+    { label: "Bebida", value: "Bebida" },
+  ];
+
+  const aplicar = () => {
+    onFiltrar(categoriaSelecionada); // envia valor para o pai
+    setVisible(false);
+  };
+
+  const limpar = () => {
+    setCategoriaSelecionada(null);
+    onFiltrar(null); // remove filtro
+    setVisible(false);
+  };
+
+  return (
+    <>
+      <Button
+        label="Filtrar Categoria"
+        icon="pi pi-filter"
+        onClick={() => setVisible(true)}
+        className="mb-4"
+      />
+
+      <Dialog
+        header="Filtrar por Categoria"
+        visible={visible}
+        onHide={() => setVisible(false)}
+        modal
+      >
+        <div className="flex flex-col gap-3 mt-2">
+          <Dropdown
+            value={categoriaSelecionada}
+            options={categorias}
+            onChange={(e) => setCategoriaSelecionada(e.value)}
+            placeholder="Selecione uma categoria"
+            className="w-full"
+          />
+
+          <div className="flex justify-end gap-2 mt-3">
+            <Button
+              label="Limpar"
+              icon="pi pi-times"
+              onClick={limpar}
+              severity="secondary"
+            />
+            <Button label="Aplicar" icon="pi pi-check" onClick={aplicar} />
+          </div>
+        </div>
+      </Dialog>
+    </>
+  );
+};
+
+export default FiltroCategoriaDialog;
