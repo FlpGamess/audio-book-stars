@@ -1,71 +1,115 @@
-// src/pages/VendasComidas.jsx
 import React from "react";
-import { Chart } from "primereact/chart";
-import { Card } from "@/components/ui/card";
+import ReactECharts from "echarts-for-react";
 
-const VendasComidas = () => {
-  const labels = ["Jan", "Fev", "Mar", "Abr"];
-  const comidas = ["Pizza", "Hamburguer", "Sushi", "Lasanha"];
+const GraficoECharts = () => {
+  const dados = [
+    // Janeiro
+    { mes: "Janeiro", comida: "Pizza", vendas: 120 },
+    { mes: "Janeiro", comida: "Sushi", vendas: 80 },
+    { mes: "Janeiro", comida: "Coxinha", vendas: 95 },
+    { mes: "Janeiro", comida: "Esfiha", vendas: 60 },
 
-  // Cada comida terá uma cor diferente
-  const cores = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC"];
+    // Fevereiro
+    { mes: "Fevereiro", comida: "Hamburguer", vendas: 140 },
+    { mes: "Fevereiro", comida: "Pastel", vendas: 70 },
+    { mes: "Fevereiro", comida: "Pão de Queijo", vendas: 100 },
+    { mes: "Fevereiro", comida: "Tapioca", vendas: 50 },
 
-  const gerarDatasetPorComida = () => {
-    return comidas.map((comida, index) => {
-      return {
-        label: comida,
-        backgroundColor: cores[index],
-        data: labels.map(() => Math.floor(Math.random() * 100 + 10)),
-      };
-    });
-  };
+    // Março
+    { mes: "Março", comida: "Brigadeiro", vendas: 130 },
+    { mes: "Março", comida: "Empada", vendas: 90 },
+    { mes: "Março", comida: "Churros", vendas: 110 },
+    { mes: "Março", comida: "Acarajé", vendas: 65 },
 
-  const data = {
-    labels,
-    datasets: gerarDatasetPorComida(),
-  };
+    // Abril
+    { mes: "Abril", comida: "Macarrão", vendas: 125 },
+    { mes: "Abril", comida: "Lasanha", vendas: 115 },
+    { mes: "Abril", comida: "Yakissoba", vendas: 135 },
+    { mes: "Abril", comida: "Hot Dog", vendas: 105 },
+  ];
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      tooltip: {
-        mode: "index",
-        intersect: false,
-      },
+  const comidas = dados.map((d) => d.comida);
+  const vendas = dados.map((d) => d.vendas);
+
+  // Agrupamento por mês
+  const meses = [...new Set(dados.map((d) => d.mes))];
+  const monthSpans = meses.map((mes) => {
+    const indices = dados
+      .map((d, i) => (d.mes === mes ? i : null))
+      .filter((i) => i !== null);
+    return {
+      name: mes,
+      start: indices[0],
+      end: indices[indices.length - 1],
+      middle: Math.floor((indices[0] + indices[indices.length - 1]) / 2,
+    };
+  });
+
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
     },
-    scales: {
-      x: {
-        stacked: true,
-        title: {
-          display: true,
-          text: "Meses",
+    grid: {
+      bottom: 100,
+    },
+    xAxis: [
+      {
+        type: "category",
+        data: comidas,
+        axisLabel: {
+          interval: 0,
+          fontSize: 12,
+        },
+        axisTick: { alignWithLabel: true },
+      },
+      {
+        type: "category",
+        position: "bottom",
+        offset: 30,
+        axisLabel: {
+          show: true,
+          fontWeight: "bold",
+          fontSize: 14,
+          formatter: (value, index) => {
+            const span = monthSpans.find(
+              (s) => index === s.middle
+            );
+            return span ? span.name : "";
+          },
+          interval: 0,
+        },
+        axisTick: {
+          alignWithLabel: true,
+          length: 0, // Remove os ticks para ficar mais limpo
+        },
+        axisLine: { show: false },
+        data: comidas.map((_, index) => index), // Usamos índices como dados
+      },
+    ],
+    yAxis: {
+      type: "value",
+      name: "Quantidade de Vendas",
+    },
+    series: [
+      {
+        type: "bar",
+        data: vendas,
+        itemStyle: {
+          color: "#42A5F5",
         },
       },
-      y: {
-        stacked: false,
-        title: {
-          display: true,
-          text: "Quantidade de Vendas",
-        },
-        beginAtZero: true,
-      },
-    },
+    ],
   };
 
   return (
     <div className="p-4 min-h-screen bg-gray-100">
-      <Card className="p-4">
-        <h2 className="text-xl font-semibold mb-4">Vendas por Comida / Mês</h2>
-        <div style={{ height: "500px" }}>
-          <Chart type="bar" data={data} options={options} />
-        </div>
-      </Card>
+      <h2 className="text-xl font-semibold mb-4">Vendas de Comidas por Mês</h2>
+      <div style={{ height: "500px" }}>
+        <ReactECharts option={option} style={{ height: "100%" }} />
+      </div>
     </div>
   );
 };
 
-export default VendasComidas;
+export default GraficoECharts;
