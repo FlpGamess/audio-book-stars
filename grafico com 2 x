@@ -1,74 +1,68 @@
+// Importa o React para criar componentes funcionais
 import React from "react";
+
+// Importa o componente ReactECharts, que conecta o ECharts ao React
 import ReactECharts from "echarts-for-react";
 
+// Componente principal do gráfico
 const GraficoECharts = () => {
+  // Array de dados: cada objeto representa uma comida vendida em um mês com sua quantidade
   const dados = [
     // Janeiro
     { mes: "Janeiro", comida: "Pizza", vendas: 120 },
     { mes: "Janeiro", comida: "Sushi", vendas: 80 },
     { mes: "Janeiro", comida: "Coxinha", vendas: 95 },
     { mes: "Janeiro", comida: "Esfiha", vendas: 60 },
-
     // Fevereiro
     { mes: "Fevereiro", comida: "Hamburguer", vendas: 140 },
     { mes: "Fevereiro", comida: "Pastel", vendas: 70 },
     { mes: "Fevereiro", comida: "Pão de Queijo", vendas: 100 },
     { mes: "Fevereiro", comida: "Tapioca", vendas: 50 },
-
     // Março
     { mes: "Março", comida: "Brigadeiro", vendas: 130 },
     { mes: "Março", comida: "Empada", vendas: 90 },
     { mes: "Março", comida: "Churros", vendas: 110 },
     { mes: "Março", comida: "Acarajé", vendas: 65 },
-
     // Abril
     { mes: "Abril", comida: "Macarrão", vendas: 125 },
     { mes: "Abril", comida: "Lasanha", vendas: 115 },
     { mes: "Abril", comida: "Yakissoba", vendas: 135 },
     { mes: "Abril", comida: "Hot Dog", vendas: 105 },
-
     // Maio
     { mes: "Maio", comida: "Torta", vendas: 100 },
     { mes: "Maio", comida: "Picanha", vendas: 120 },
     { mes: "Maio", comida: "Feijoada", vendas: 130 },
     { mes: "Maio", comida: "Churrasco", vendas: 140 },
-
     // Junho
     { mes: "Junho", comida: "Pipoca", vendas: 75 },
     { mes: "Junho", comida: "Quentão", vendas: 65 },
     { mes: "Junho", comida: "Cachorro Quente", vendas: 90 },
     { mes: "Junho", comida: "Milho Verde", vendas: 80 },
-
     // Julho
     { mes: "Julho", comida: "Sorvete", vendas: 110 },
     { mes: "Julho", comida: "Milkshake", vendas: 90 },
     { mes: "Julho", comida: "Açaí", vendas: 100 },
     { mes: "Julho", comida: "Cocada", vendas: 85 },
-
     // Agosto
     { mes: "Agosto", comida: "Empadão", vendas: 95 },
     { mes: "Agosto", comida: "Escondidinho", vendas: 105 },
     { mes: "Agosto", comida: "Risoto", vendas: 115 },
     { mes: "Agosto", comida: "Moqueca", vendas: 120 },
-
     // Setembro
     { mes: "Setembro", comida: "Pastel de Feira", vendas: 130 },
     { mes: "Setembro", comida: "Caldo Verde", vendas: 75 },
     { mes: "Setembro", comida: "Bolinho de Bacalhau", vendas: 95 },
     { mes: "Setembro", comida: "Tapioca", vendas: 85 },
-
     // Outubro
     { mes: "Outubro", comida: "Pizza", vendas: 140 },
     { mes: "Outubro", comida: "Sushi", vendas: 80 },
     { mes: "Outubro", comida: "Coxinha", vendas: 90 },
     { mes: "Outubro", comida: "Esfiha", vendas: 70 },
-
     // Novembro
     { mes: "Novembro", comida: "Churrasco", vendas: 150 },
     { mes: "Novembro", comida: "Feijoada", vendas: 130 },
     { mes: "Novembro", comida: "Picanha", vendas: 140 },
     { mes: "Novembro", comida: "Torta", vendas: 100 },
-
     // Dezembro
     { mes: "Dezembro", comida: "Panetone", vendas: 120 },
     { mes: "Dezembro", comida: "Pavê", vendas: 110 },
@@ -76,9 +70,10 @@ const GraficoECharts = () => {
     { mes: "Dezembro", comida: "Chester", vendas: 130 },
   ];
 
+  // Extrai os nomes das comidas para usar como labels no eixo X principal
   const comidas = dados.map((d) => d.comida);
 
-  // Cores para cada mês (criei cores diferentes para os meses extras)
+  // Mapa de cores para cada mês
   const corPorMes = {
     Janeiro: "#42A5F5",
     Fevereiro: "#66BB6A",
@@ -94,13 +89,16 @@ const GraficoECharts = () => {
     Dezembro: "#B39DDB",
   };
 
+  // Cria um novo array com o valor e a cor (itemStyle) para cada barra
   const cores = dados.map((d) => ({
     value: d.vendas,
     itemStyle: { color: corPorMes[d.mes] },
   }));
 
-  // Agrupamento por mês
+  // Extrai os nomes únicos dos meses na ordem
   const meses = [...new Set(dados.map((d) => d.mes))];
+
+  // Para cada mês, identifica o primeiro e o último índice no array de dados
   const monthSpans = meses.map((mes) => {
     const indices = dados
       .map((d, i) => (d.mes === mes ? i : null))
@@ -112,38 +110,44 @@ const GraficoECharts = () => {
     };
   });
 
+  // Cria um array do tamanho dos dados, preenchido com "", e insere o nome do mês no índice central
   const mesLabels = new Array(dados.length).fill("");
   monthSpans.forEach((span) => {
     const middleIndex = Math.floor((span.from + span.to) / 2);
     mesLabels[middleIndex] = span.name;
   });
 
+  // Opções do gráfico (formato do ECharts)
   const option = {
     tooltip: {
-      trigger: "axis",
-      axisPointer: { type: "shadow" },
+      trigger: "axis", // ativa tooltip ao passar no eixo
+      axisPointer: { type: "shadow" }, // tipo de ponteiro ao passar o mouse
+    },
+    grid: {
+      bottom: 140, // margem inferior maior para comportar as labels inclinadas
     },
     xAxis: [
+      // Eixo X principal: nomes das comidas
       {
         type: "category",
-        data: comidas,
+        data: comidas, // array com os nomes das comidas
         axisLabel: {
-          interval: 0,
+          interval: 0, // mostra todas as labels
           fontSize: 12,
-          rotate: 45,
+          rotate: 45, // rotaciona as labels para evitar sobreposição
           align: "right",
-          verticalAlign: "middle",
         },
         axisTick: { alignWithLabel: true },
-        boundaryGap: true,
+        boundaryGap: true, // dá espaço antes e depois das barras
       },
+      // Segundo eixo X: nomes dos meses centralizados
       {
         type: "category",
-        data: mesLabels,
-        position: "bottom",
-        offset: 50,
-        axisTick: { show: false },
-        axisLine: { show: false },
+        data: mesLabels, // array com o nome do mês centralizado em cada grupo
+        position: "bottom", // fica abaixo do eixo principal
+        offset: 50, // distância vertical entre os dois eixos
+        axisTick: { show: false }, // esconde os ticks
+        axisLine: { show: false }, // esconde a linha do eixo
         axisLabel: {
           interval: 0,
           fontWeight: "bold",
@@ -153,28 +157,28 @@ const GraficoECharts = () => {
         boundaryGap: true,
       },
     ],
-    grid: {
-      bottom: 140,
-    },
-
     yAxis: {
-      type: "value",
-      name: "Quantidade de Vendas",
+      type: "value", // numérico
+      name: "Quantidade de Vendas", // título do eixo
     },
     series: [
       {
-        type: "bar",
-        data: cores,
-        barCategoryGap: "40%",
+        type: "bar", // gráfico de barras
+        data: cores, // dados com cor e valor
+        barCategoryGap: "40%", // espaçamento entre categorias
       },
     ],
   };
 
+  // Retorna o JSX com o gráfico embutido
   return (
     <div className="p-4 min-h-screen bg-gray-100">
+      {/* Título */}
       <h2 className="text-xl font-semibold mb-4">
         Vendas de Comidas por Mês (com cores e meses centralizados)
       </h2>
+
+      {/* Gráfico ECharts */}
       <div style={{ height: "500px" }}>
         <ReactECharts option={option} style={{ height: "100%" }} />
       </div>
@@ -182,4 +186,5 @@ const GraficoECharts = () => {
   );
 };
 
+// Exporta o componente para ser usado em outro lugar
 export default GraficoECharts;
