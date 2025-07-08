@@ -26,10 +26,78 @@ const GraficoECharts = () => {
     { mes: "Abril", comida: "Lasanha", vendas: 115 },
     { mes: "Abril", comida: "Yakissoba", vendas: 135 },
     { mes: "Abril", comida: "Hot Dog", vendas: 105 },
+
+    // Maio
+    { mes: "Maio", comida: "Torta", vendas: 100 },
+    { mes: "Maio", comida: "Picanha", vendas: 120 },
+    { mes: "Maio", comida: "Feijoada", vendas: 130 },
+    { mes: "Maio", comida: "Churrasco", vendas: 140 },
+
+    // Junho
+    { mes: "Junho", comida: "Pipoca", vendas: 75 },
+    { mes: "Junho", comida: "Quentão", vendas: 65 },
+    { mes: "Junho", comida: "Cachorro Quente", vendas: 90 },
+    { mes: "Junho", comida: "Milho Verde", vendas: 80 },
+
+    // Julho
+    { mes: "Julho", comida: "Sorvete", vendas: 110 },
+    { mes: "Julho", comida: "Milkshake", vendas: 90 },
+    { mes: "Julho", comida: "Açaí", vendas: 100 },
+    { mes: "Julho", comida: "Cocada", vendas: 85 },
+
+    // Agosto
+    { mes: "Agosto", comida: "Empadão", vendas: 95 },
+    { mes: "Agosto", comida: "Escondidinho", vendas: 105 },
+    { mes: "Agosto", comida: "Risoto", vendas: 115 },
+    { mes: "Agosto", comida: "Moqueca", vendas: 120 },
+
+    // Setembro
+    { mes: "Setembro", comida: "Pastel de Feira", vendas: 130 },
+    { mes: "Setembro", comida: "Caldo Verde", vendas: 75 },
+    { mes: "Setembro", comida: "Bolinho de Bacalhau", vendas: 95 },
+    { mes: "Setembro", comida: "Tapioca", vendas: 85 },
+
+    // Outubro
+    { mes: "Outubro", comida: "Pizza", vendas: 140 },
+    { mes: "Outubro", comida: "Sushi", vendas: 80 },
+    { mes: "Outubro", comida: "Coxinha", vendas: 90 },
+    { mes: "Outubro", comida: "Esfiha", vendas: 70 },
+
+    // Novembro
+    { mes: "Novembro", comida: "Churrasco", vendas: 150 },
+    { mes: "Novembro", comida: "Feijoada", vendas: 130 },
+    { mes: "Novembro", comida: "Picanha", vendas: 140 },
+    { mes: "Novembro", comida: "Torta", vendas: 100 },
+
+    // Dezembro
+    { mes: "Dezembro", comida: "Panetone", vendas: 120 },
+    { mes: "Dezembro", comida: "Pavê", vendas: 110 },
+    { mes: "Dezembro", comida: "Rabanada", vendas: 115 },
+    { mes: "Dezembro", comida: "Chester", vendas: 130 },
   ];
 
   const comidas = dados.map((d) => d.comida);
-  const vendas = dados.map((d) => d.vendas);
+
+  // Cores para cada mês (criei cores diferentes para os meses extras)
+  const corPorMes = {
+    Janeiro: "#42A5F5",
+    Fevereiro: "#66BB6A",
+    Março: "#FFA726",
+    Abril: "#AB47BC",
+    Maio: "#EF5350",
+    Junho: "#26A69A",
+    Julho: "#8D6E63",
+    Agosto: "#D4E157",
+    Setembro: "#5C6BC0",
+    Outubro: "#FF7043",
+    Novembro: "#789262",
+    Dezembro: "#B39DDB",
+  };
+
+  const cores = dados.map((d) => ({
+    value: d.vendas,
+    itemStyle: { color: corPorMes[d.mes] },
+  }));
 
   // Agrupamento por mês
   const meses = [...new Set(dados.map((d) => d.mes))];
@@ -39,19 +107,21 @@ const GraficoECharts = () => {
       .filter((i) => i !== null);
     return {
       name: mes,
-      start: indices[0],
-      end: indices[indices.length - 1],
-      middle: Math.floor((indices[0] + indices[indices.length - 1]) / 2,
+      from: indices[0],
+      to: indices[indices.length - 1],
     };
+  });
+
+  const mesLabels = new Array(dados.length).fill("");
+  monthSpans.forEach((span) => {
+    const middleIndex = Math.floor((span.from + span.to) / 2);
+    mesLabels[middleIndex] = span.name;
   });
 
   const option = {
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
-    },
-    grid: {
-      bottom: 100,
     },
     xAxis: [
       {
@@ -60,33 +130,33 @@ const GraficoECharts = () => {
         axisLabel: {
           interval: 0,
           fontSize: 12,
+          rotate: 45,
+          align: "right",
+          verticalAlign: "middle",
         },
         axisTick: { alignWithLabel: true },
+        boundaryGap: true,
       },
       {
         type: "category",
+        data: mesLabels,
         position: "bottom",
-        offset: 30,
+        offset: 50,
+        axisTick: { show: false },
+        axisLine: { show: false },
         axisLabel: {
-          show: true,
+          interval: 0,
           fontWeight: "bold",
           fontSize: 14,
-          formatter: (value, index) => {
-            const span = monthSpans.find(
-              (s) => index === s.middle
-            );
-            return span ? span.name : "";
-          },
-          interval: 0,
+          align: "center",
         },
-        axisTick: {
-          alignWithLabel: true,
-          length: 0, // Remove os ticks para ficar mais limpo
-        },
-        axisLine: { show: false },
-        data: comidas.map((_, index) => index), // Usamos índices como dados
+        boundaryGap: true,
       },
     ],
+    grid: {
+      bottom: 140,
+    },
+
     yAxis: {
       type: "value",
       name: "Quantidade de Vendas",
@@ -94,17 +164,17 @@ const GraficoECharts = () => {
     series: [
       {
         type: "bar",
-        data: vendas,
-        itemStyle: {
-          color: "#42A5F5",
-        },
+        data: cores,
+        barCategoryGap: "40%",
       },
     ],
   };
 
   return (
     <div className="p-4 min-h-screen bg-gray-100">
-      <h2 className="text-xl font-semibold mb-4">Vendas de Comidas por Mês</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Vendas de Comidas por Mês (com cores e meses centralizados)
+      </h2>
       <div style={{ height: "500px" }}>
         <ReactECharts option={option} style={{ height: "100%" }} />
       </div>
