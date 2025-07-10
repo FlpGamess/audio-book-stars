@@ -1,0 +1,56 @@
+import React, { useState } from "react";
+import { Button } from "primereact/button";
+import { ScrollPanel } from "primereact/scrollpanel";
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+
+const BotoesEmGruposFixos = () => {
+  const total = 40;
+  const botoesPorLinha = 4;
+  const linhasVisiveis = 4;
+  const [selecionado, setSelecionado] = useState(null);
+
+  const opcoes = Array.from({ length: total }, (_, i) => `Botão ${i + 1}`);
+
+  // Quebra os botões em grupos de 4 (linhas)
+  const grupos = [];
+  for (let i = 0; i < opcoes.length; i += botoesPorLinha) {
+    grupos.push(opcoes.slice(i, i + botoesPorLinha));
+  }
+
+  return (
+    <div style={{ width: "100%", maxWidth: "620px", margin: "0 auto" }}>
+      <ScrollPanel
+        style={{ width: "100%", height: `${linhasVisiveis * 50 + 16}px` }}
+      >
+        <div className="flex flex-col gap-2 p-2">
+          {grupos.map((grupo, linhaIndex) => (
+            <div key={linhaIndex} className="flex justify-between gap-2">
+              {grupo.map((opcao, i) => (
+                <Button
+                  key={i}
+                  label={opcao}
+                  onClick={() => setSelecionado(opcao)}
+                  className={
+                    selecionado === opcao
+                      ? "p-button-success p-button-sm"
+                      : "p-button-outlined p-button-sm"
+                  }
+                  style={{
+                    flex: 1,
+                    fontSize: "0.75rem",
+                    padding: "0.4rem 0.5rem",
+                    height: "40px",
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </ScrollPanel>
+    </div>
+  );
+};
+
+export default BotoesEmGruposFixos;
