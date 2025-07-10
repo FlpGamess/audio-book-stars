@@ -1,3 +1,4 @@
+//javascript
 import React, { useState } from "react";
 import { Button } from "primereact/button";
 import { ScrollPanel } from "primereact/scrollpanel";
@@ -5,6 +6,7 @@ import { Card } from "primereact/card";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import "./style.css";
 
 const BotoesComidas = () => {
   const [selecionado, setSelecionado] = useState(null);
@@ -33,19 +35,11 @@ const BotoesComidas = () => {
   ];
 
   return (
-    <div style={{ width: "100%", maxWidth: "700px", margin: "0 auto" }}>
+    <div className="card-wrapper">
       <Card title="Selecione uma Comida">
         <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-          {/* Scroll com quebra automática de linha */}
           <ScrollPanel style={{ height: "96px", width: "400px" }}>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "4px",
-                padding: "4px",
-              }}
-            >
+            <div className="botao-grid">
               {opcoes.map((comida, index) => (
                 <Button
                   key={index}
@@ -57,9 +51,7 @@ const BotoesComidas = () => {
                       : "p-button-outlined p-button-sm"
                   }
                   style={{
-                    width: "calc(25% - 4px)", // 4 por linha com gap
-                    fontSize: "0.65rem",
-                    padding: "0.25rem 0.4rem",
+                    width: "calc(25% - 6px)",
                     height: "28px",
                     whiteSpace: "nowrap",
                   }}
@@ -68,19 +60,18 @@ const BotoesComidas = () => {
             </div>
           </ScrollPanel>
 
-          {/* Botões laterais menores */}
-          <div className="flex flex-col gap-1">
+          <div className="lateral-buttons">
             <Button
               label="Confirmar"
               icon="pi pi-check"
               className="p-button-sm"
-              style={{ width: "100px", height: "28px", fontSize: "0.7rem" }}
+              style={{ width: "100px", height: "28px" }}
             />
             <Button
               label="Cancelar"
               icon="pi pi-times"
               className="p-button-secondary p-button-sm"
-              style={{ width: "100px", height: "28px", fontSize: "0.7rem" }}
+              style={{ width: "100px", height: "28px" }}
             />
           </div>
         </div>
@@ -90,3 +81,72 @@ const BotoesComidas = () => {
 };
 
 export default BotoesComidas;
+
+
+//-----------------------------------------------
+//css
+/* style.css */
+
+/* Tipografia base */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container do card */
+.card-wrapper {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 16px;
+}
+
+/* ScrollPanel customizado */
+.p-scrollpanel {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+/* Área interna de botões */
+.botao-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  justify-content: space-between;
+}
+
+/* Estilo base dos botões */
+/* Estilo base dos botões */
+.p-button {
+  transition: all 0.2s ease-in-out;
+  border-radius: 6px !important;
+  font-size: 0.65rem !important; /* 👈 diminuiu aqui */
+  font-weight: 500;
+  padding: 0.25rem 0.4rem !important; /* padding reduzido */
+  height: 28px !important; /* altura menor */
+}
+
+/* Botão selecionado */
+.p-button-success {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+  color: white !important;
+}
+
+/* Botão hover */
+.p-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Botões laterais */
+.lateral-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
