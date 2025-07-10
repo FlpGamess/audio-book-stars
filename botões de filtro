@@ -5,35 +5,54 @@ import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
-const BotoesEmGruposFixos = () => {
-  const total = 40;
-  const botoesPorLinha = 4;
-  const linhasVisiveis = 4;
+const BotoesComidas = () => {
   const [selecionado, setSelecionado] = useState(null);
 
-  const opcoes = Array.from({ length: total }, (_, i) => `Botão ${i + 1}`);
+  // 🍽️ Vetor com 20 comidas
+  const opcoes = [
+    "Pizza",
+    "Sushi",
+    "Hambúrguer",
+    "Coxinha",
+    "Lasanha",
+    "Taco",
+    "Churrasco",
+    "Salada",
+    "Pastel",
+    "Hot Dog",
+    "Pão de Queijo",
+    "Feijoada",
+    "Kebab",
+    "Espaguete",
+    "Frango Frito",
+    "Batata Frita",
+    "Risoto",
+    "Burrito",
+    "Temaki",
+    "Moqueca",
+  ];
 
-  // Quebra os botões em grupos de 4 (linhas)
-  const grupos = [];
+  // 🔄 Quebrar em grupos de 4
+  const botoesPorLinha = 4;
+  const linhas = [];
   for (let i = 0; i < opcoes.length; i += botoesPorLinha) {
-    grupos.push(opcoes.slice(i, i + botoesPorLinha));
+    linhas.push(opcoes.slice(i, i + botoesPorLinha));
   }
 
   return (
     <div style={{ width: "100%", maxWidth: "620px", margin: "0 auto" }}>
-      <ScrollPanel
-        style={{ width: "100%", height: `${linhasVisiveis * 50 + 16}px` }}
-      >
+      {/* 4 linhas × 48px (40 de altura + 8px de gap) = 192px */}
+      <ScrollPanel style={{ width: "100%", height: "192px" }}>
         <div className="flex flex-col gap-2 p-2">
-          {grupos.map((grupo, linhaIndex) => (
+          {linhas.map((linha, linhaIndex) => (
             <div key={linhaIndex} className="flex justify-between gap-2">
-              {grupo.map((opcao, i) => (
+              {linha.map((comida, index) => (
                 <Button
-                  key={i}
-                  label={opcao}
-                  onClick={() => setSelecionado(opcao)}
+                  key={index}
+                  label={comida}
+                  onClick={() => setSelecionado(comida)}
                   className={
-                    selecionado === opcao
+                    selecionado === comida
                       ? "p-button-success p-button-sm"
                       : "p-button-outlined p-button-sm"
                   }
@@ -53,4 +72,4 @@ const BotoesEmGruposFixos = () => {
   );
 };
 
-export default BotoesEmGruposFixos;
+export default BotoesComidas;
