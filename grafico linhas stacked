@@ -1,0 +1,99 @@
+import React from "react";
+import ReactECharts from "echarts-for-react";
+
+const GraficoStackedLinhas = () => {
+  // Dados: comida, mês e vendas
+  const dados = [
+    { mes: "Janeiro", comida: "Pizza", vendas: 120 },
+    { mes: "Janeiro", comida: "Sushi", vendas: 80 },
+    { mes: "Janeiro", comida: "Coxinha", vendas: 95 },
+    { mes: "Janeiro", comida: "Esfiha", vendas: 60 },
+
+    { mes: "Fevereiro", comida: "Pizza", vendas: 140 },
+    { mes: "Fevereiro", comida: "Sushi", vendas: 100 },
+    { mes: "Fevereiro", comida: "Coxinha", vendas: 90 },
+    { mes: "Fevereiro", comida: "Esfiha", vendas: 80 },
+
+    { mes: "Março", comida: "Pizza", vendas: 130 },
+    { mes: "Março", comida: "Sushi", vendas: 90 },
+    { mes: "Março", comida: "Coxinha", vendas: 85 },
+    { mes: "Março", comida: "Esfiha", vendas: 75 },
+
+    { mes: "Abril", comida: "Pizza", vendas: 110 },
+    { mes: "Abril", comida: "Sushi", vendas: 95 },
+    { mes: "Abril", comida: "Coxinha", vendas: 100 },
+    { mes: "Abril", comida: "Esfiha", vendas: 85 },
+
+    { mes: "Maio", comida: "Pizza", vendas: 150 },
+    { mes: "Maio", comida: "Sushi", vendas: 130 },
+    { mes: "Maio", comida: "Coxinha", vendas: 90 },
+    { mes: "Maio", comida: "Esfiha", vendas: 95 },
+  ];
+
+  // Extrai todos os meses únicos na ordem correta
+  const meses = [...new Set(dados.map((d) => d.mes))];
+
+  // Extrai todas as comidas únicas
+  const comidas = [...new Set(dados.map((d) => d.comida))];
+
+  // Mapeia as comidas para séries separadas com seus dados por mês
+  const series = comidas.map((comida) => {
+    // Para cada comida, cria um array com as vendas por mês
+    const data = meses.map((mes) => {
+      const entrada = dados.find((d) => d.mes === mes && d.comida === comida);
+      return entrada ? entrada.vendas : 0;
+    });
+
+    return {
+      name: comida,
+      type: "line",
+      stack: "Total", // ativa o empilhamento
+      data,
+      smooth: true, // curva suavizada
+    };
+  });
+
+  // Cores opcionais para melhor visualização
+  const cores = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC"];
+
+  // Configuração do gráfico
+  const option = {
+    tooltip: {
+      trigger: "axis",
+    },
+    legend: {
+      top: 10,
+      data: comidas, // mostra os nomes das comidas
+    },
+    color: cores,
+    grid: {
+      left: "3%",
+      right: "4%",
+      bottom: "10%",
+      containLabel: true,
+    },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: meses, // eixo X com os meses
+    },
+    yAxis: {
+      type: "value",
+      name: "Vendas",
+    },
+    series,
+  };
+
+  return (
+    <div className="p-4 min-h-screen bg-gray-100">
+      <h2 className="text-xl font-semibold mb-4">
+        Gráfico de Linhas Empilhadas por Comida
+      </h2>
+      <div style={{ height: "500px" }}>
+        <ReactECharts option={option} style={{ height: "100%" }} />
+      </div>
+    </div>
+  );
+};
+
+export default GraficoStackedLinhas;
