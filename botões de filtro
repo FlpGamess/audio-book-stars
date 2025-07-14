@@ -1,15 +1,17 @@
-//javascript
 import React, { useState } from "react";
 import { Button } from "primereact/button";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Card } from "primereact/card";
+import { InputText } from "primereact/inputtext";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./style.css";
 
 const BotoesComidas = () => {
-  const [selecionado, setSelecionado] = useState(null);
+  const [modoMultiplo, setModoMultiplo] = useState(false);
+  const [selecionado, setSelecionado] = useState([]);
+  const [filtro, setFiltro] = useState("");
 
   const opcoes = [
     "Pizza",
@@ -34,44 +36,153 @@ const BotoesComidas = () => {
     "Moqueca",
   ];
 
+  // Filtra as opções baseado no filtro, case-insensitive
+  const opcoesFiltradas = opcoes.filter((comida) =>
+    comida.toLowerCase().includes(filtro.toLowerCase())
+  );
+
+  const toggleComida = (comida) => {
+    if (modoMultiplo) {
+      setSelecionado((prev) =>
+        prev.includes(comida)
+          ? prev.filter((c) => c !== comida)
+          : [...prev, comida]
+      );
+    } else {
+      setSelecionado((prev) => (prev.includes(comida) ? [] : [comida]));
+    }
+  };
+
+  const estaSelecionado = (comida) => selecionado.includes(comida);
+
+  const selecionarTudo = () => {
+    if (modoMultiplo) {
+      // Seleciona todas as opções visíveis no filtro (para fazer sentido)
+      setSelecionado([...opcoesFiltradas]);
+    } else {
+      setSelecionado(opcoesFiltradas.length > 0 ? [opcoesFiltradas[0]] : []);
+    }
+  };
+
+  const desmarcarTudo = () => {
+    setSelecionado([]);
+  };
+
   return (
     <div className="card-wrapper">
       <Card title="Selecione uma Comida">
         <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-          <ScrollPanel style={{ height: "96px", width: "400px" }}>
-            <div className="botao-grid">
-              {opcoes.map((comida, index) => (
+          <ScrollPanel style={{ height: "180px", width: "400px" }}>
+            <div className="botao-grid" style={{ flexDirection: "column" }}>
+              {/* Linha dos botões modo múltiplo + selecionar/desmarcar tudo */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  marginBottom: "8px",
+                  alignItems: "center",
+                }}
+              >
                 <Button
-                  key={index}
-                  label={comida}
-                  onClick={() => setSelecionado(comida)}
-                  className={
-                    selecionado === comida
-                      ? "p-button-success p-button-sm"
-                      : "p-button-outlined p-button-sm"
+                  label={
+                    modoMultiplo ? "Modo Múltiplo: ON" : "Modo Múltiplo: OFF"
                   }
+                  icon={modoMultiplo ? "pi pi-clone" : "pi pi-user"}
+                  className={
+                    modoMultiplo
+                      ? "p-button-warning p-button-sm"
+                      : "p-button-info p-button-sm"
+                  }
+                  onClick={() => {
+                    setModoMultiplo(!modoMultiplo);
+                    setSelecionado([]); // limpa seleção ao trocar modo
+                  }}
                   style={{
-                    width: "calc(25% - 6px)",
-                    height: "28px",
-                    whiteSpace: "nowrap",
+                    fontSize: "0.7rem",
+                    height: "26px",
+                    width: "160px",
                   }}
                 />
-              ))}
+
+                <Button
+                  label="Selecionar Tudo"
+                  icon="pi pi-check-square"
+                  className="p-button-sm p-button-success"
+                  style={{ height: "26px", fontSize: "0.65rem" }}
+                  onClick={selecionarTudo}
+                />
+                <Button
+                  label="Desmarcar Tudo"
+                  icon="pi pi-times-circle"
+                  className="p-button-sm p-button-danger"
+                  style={{ height: "26px", fontSize: "0.65rem" }}
+                  onClick={desmarcarTudo}
+                />
+              </div>
+
+              {/* Barra de pesquisa */}
+              <div style={{ marginBottom: "8px" }}>
+                <InputText
+                  placeholder="Pesquisar comida..."
+                  value={filtro}
+                  onChange={(e) => setFiltro(e.target.value)}
+                  style={{ width: "100%" }}
+                  className="p-inputtext-sm"
+                />
+              </div>
+
+              {/* Botões de comida filtrados */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "4px",
+                }}
+              >
+                {opcoesFiltradas.length > 0 ? (
+                  opcoesFiltradas.map((comida, index) => (
+                    <Button
+                      key={index}
+                      label={comida}
+                      onClick={() => toggleComida(comida)}
+                      className={
+                        estaSelecionado(comida)
+                          ? "p-button-success p-button-sm"
+                          : "p-button-outlined p-button-sm"
+                      }
+                      style={{
+                        width: "calc(25% - 6px)",
+                        height: "28px",
+                        fontSize: "0.65rem",
+                        whiteSpace: "nowrap",
+                      }}
+                    />
+                  ))
+                ) : (
+                  <small>Nenhuma comida encontrada</small>
+                )}
+              </div>
             </div>
           </ScrollPanel>
 
-          <div className="lateral-buttons">
+          {/* Botões laterais Confirmar e Cancelar */}
+          <div
+            className="lateral-buttons"
+            style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+          >
             <Button
               label="Confirmar"
               icon="pi pi-check"
               className="p-button-sm"
               style={{ width: "100px", height: "28px" }}
+              onClick={() => alert(`Selecionado(s): ${selecionado.join(", ")}`)}
             />
             <Button
               label="Cancelar"
               icon="pi pi-times"
               className="p-button-secondary p-button-sm"
               style={{ width: "100px", height: "28px" }}
+              onClick={() => setSelecionado([])}
             />
           </div>
         </div>
@@ -81,72 +192,3 @@ const BotoesComidas = () => {
 };
 
 export default BotoesComidas;
-
-
-//-----------------------------------------------
-//css
-/* style.css */
-
-/* Tipografia base */
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f7fa;
-  color: #333;
-  margin: 0;
-  padding: 0;
-}
-
-/* Container do card */
-.card-wrapper {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 16px;
-}
-
-/* ScrollPanel customizado */
-.p-scrollpanel {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: #fff;
-}
-
-/* Área interna de botões */
-.botao-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  justify-content: space-between;
-}
-
-/* Estilo base dos botões */
-/* Estilo base dos botões */
-.p-button {
-  transition: all 0.2s ease-in-out;
-  border-radius: 6px !important;
-  font-size: 0.65rem !important; /* 👈 diminuiu aqui */
-  font-weight: 500;
-  padding: 0.25rem 0.4rem !important; /* padding reduzido */
-  height: 28px !important; /* altura menor */
-}
-
-/* Botão selecionado */
-.p-button-success {
-  background-color: #10b981 !important;
-  border-color: #10b981 !important;
-  color: white !important;
-}
-
-/* Botão hover */
-.p-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-}
-
-/* Botões laterais */
-.lateral-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
