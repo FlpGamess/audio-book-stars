@@ -1,99 +1,123 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-const GraficoStackedLinhas = () => {
-  // Dados: comida, mês e vendas
-  const dados = [
-    { mes: "Janeiro", comida: "Pizza", vendas: 120 },
-    { mes: "Janeiro", comida: "Sushi", vendas: 80 },
-    { mes: "Janeiro", comida: "Coxinha", vendas: 95 },
-    { mes: "Janeiro", comida: "Esfiha", vendas: 60 },
-
-    { mes: "Fevereiro", comida: "Pizza", vendas: 140 },
-    { mes: "Fevereiro", comida: "Sushi", vendas: 100 },
-    { mes: "Fevereiro", comida: "Coxinha", vendas: 90 },
-    { mes: "Fevereiro", comida: "Esfiha", vendas: 80 },
-
-    { mes: "Março", comida: "Pizza", vendas: 130 },
-    { mes: "Março", comida: "Sushi", vendas: 90 },
-    { mes: "Março", comida: "Coxinha", vendas: 85 },
-    { mes: "Março", comida: "Esfiha", vendas: 75 },
-
-    { mes: "Abril", comida: "Pizza", vendas: 110 },
-    { mes: "Abril", comida: "Sushi", vendas: 95 },
-    { mes: "Abril", comida: "Coxinha", vendas: 100 },
-    { mes: "Abril", comida: "Esfiha", vendas: 85 },
-
-    { mes: "Maio", comida: "Pizza", vendas: 150 },
-    { mes: "Maio", comida: "Sushi", vendas: 130 },
-    { mes: "Maio", comida: "Coxinha", vendas: 90 },
-    { mes: "Maio", comida: "Esfiha", vendas: 95 },
+const GraficoResponsivoComAnoFixo = () => {
+  const meses = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
   ];
+  const anos = [2022, 2023, 2024];
+  const comidas = ["Pizza", "Sushi", "Coxinha", "Esfiha"];
 
-  // Extrai todos os meses únicos na ordem correta
-  const meses = [...new Set(dados.map((d) => d.mes))];
+  const dados = [];
+  for (const ano of anos) {
+    for (const mes of meses) {
+      for (const comida of comidas) {
+        dados.push({
+          ano,
+          mes,
+          comida,
+          vendas: Math.floor(Math.random() * 80) + 60,
+        });
+      }
+    }
+  }
 
-  // Extrai todas as comidas únicas
-  const comidas = [...new Set(dados.map((d) => d.comida))];
+  // Eixo X 1: Meses (abreviados)
+  const eixoMeses = [];
+  for (const ano of anos) {
+    for (const mes of meses) {
+      eixoMeses.push(mes.substring(0, 3)); // Jan, Fev, etc.
+    }
+  }
 
-  // Mapeia as comidas para séries separadas com seus dados por mês
+  // Eixo X 2: Anos centralizados
+  const anoLabels = new Array(eixoMeses.length).fill("");
+  anos.forEach((ano, i) => {
+    const index = i * 12 + 5; // meio de cada grupo de 12 meses
+    anoLabels[index] = String(ano);
+  });
+
+  // Séries (1 por comida)
   const series = comidas.map((comida) => {
-    // Para cada comida, cria um array com as vendas por mês
-    const data = meses.map((mes) => {
-      const entrada = dados.find((d) => d.mes === mes && d.comida === comida);
-      return entrada ? entrada.vendas : 0;
-    });
-
+    const data = dados.filter((d) => d.comida === comida).map((d) => d.vendas);
     return {
       name: comida,
       type: "line",
-      stack: "Total", // ativa o empilhamento
+      smooth: true,
+      symbolSize: 6,
+      lineStyle: { width: 2 },
       data,
-      smooth: true, // curva suavizada
     };
   });
 
-  // Cores opcionais para melhor visualização
-  const cores = ["#42A5F5", "#66BB6A", "#FFA726", "#AB47BC"];
-
-  // Configuração do gráfico
   const option = {
-    tooltip: {
-      trigger: "axis",
-    },
+    tooltip: { trigger: "axis" },
     legend: {
       top: 10,
-      data: comidas, // mostra os nomes das comidas
+      textStyle: { fontSize: 12 },
     },
-    color: cores,
     grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "10%",
+      left: "5%",
+      right: "5%",
+      bottom: 100,
       containLabel: true,
     },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: meses, // eixo X com os meses
-    },
+    xAxis: [
+      {
+        type: "category",
+        data: eixoMeses,
+        boundaryGap: false,
+        axisLabel: {
+          rotate: 45,
+          fontSize: 10,
+        },
+      },
+      {
+        type: "category",
+        position: "bottom",
+        offset: 30, // distância do eixo anterior
+        data: anoLabels,
+        axisTick: { show: false },
+        axisLine: { show: false },
+        axisLabel: {
+          fontWeight: "bold",
+          fontSize: 14,
+          color: "#444",
+        },
+      },
+    ],
     yAxis: {
       type: "value",
       name: "Vendas",
+      nameTextStyle: { fontSize: 12 },
     },
     series,
   };
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100">
+    <div className="p-4 min-h-screen bg-gray-100 overflow-x-auto">
       <h2 className="text-xl font-semibold mb-4">
-        Gráfico de Linhas Empilhadas por Comida
+        Gráfico Responsivo com Meses e Anos no Eixo X
       </h2>
-      <div style={{ height: "500px" }}>
-        <ReactECharts option={option} style={{ height: "100%" }} />
+      <div style={{ minWidth: "900px", height: "500px" }}>
+        <ReactECharts
+          option={option}
+          style={{ width: "100%", height: "100%" }}
+        />
       </div>
     </div>
   );
 };
 
-export default GraficoStackedLinhas;
+export default GraficoResponsivoComAnoFixo;
