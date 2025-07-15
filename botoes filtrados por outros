@@ -1,0 +1,194 @@
+import React, { useState } from "react";
+import { Button } from "primereact/button";
+import { ScrollPanel } from "primereact/scrollpanel";
+import { Card } from "primereact/card";
+import { InputText } from "primereact/inputtext";
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import "./style.css";
+
+const dados = [
+  { comida: "Pizza", ingrediente: "Queijo", preco: "20-30" },
+  { comida: "Pizza", ingrediente: "Tomate", preco: "20-30" },
+  { comida: "Pizza", ingrediente: "Massa", preco: "20-30" },
+  { comida: "Sushi", ingrediente: "Peixe", preco: "30-40" },
+  { comida: "Sushi", ingrediente: "Arroz", preco: "30-40" },
+  { comida: "Coxinha", ingrediente: "Frango", preco: "10-20" },
+  { comida: "Coxinha", ingrediente: "Farinha", preco: "10-20" },
+  { comida: "Feijoada", ingrediente: "Feijão", preco: "30-40" },
+  { comida: "Feijoada", ingrediente: "Carne", preco: "30-40" },
+];
+
+const colunas = ["comida", "ingrediente", "preco"];
+
+const FiltrosComida = () => {
+  const [configs, setConfigs] = useState(
+    colunas.map(() => ({ selecionado: [], modoMultiplo: false, filtro: "" }))
+  );
+
+  // Atualiza o estado de seleção
+  const toggleItem = (colIndex, item) => {
+    setConfigs((prev) => {
+      const col = prev[colIndex];
+      let novoSelecionado = col.selecionado.includes(item)
+        ? col.modoMultiplo
+          ? col.selecionado.filter((v) => v !== item)
+          : []
+        : col.modoMultiplo
+        ? [...col.selecionado, item]
+        : [item];
+      const novo = [...prev];
+      novo[colIndex] = { ...col, selecionado: novoSelecionado };
+      return novo;
+    });
+  };
+
+  const toggleModo = (colIndex) => {
+    setConfigs((prev) => {
+      const novo = [...prev];
+      novo[colIndex] = {
+        ...prev[colIndex],
+        modoMultiplo: !prev[colIndex].modoMultiplo,
+        selecionado: [],
+      };
+      return novo;
+    });
+  };
+
+  const selecionarTudo = (colIndex, opcoes) => {
+    setConfigs((prev) => {
+      const novo = [...prev];
+      novo[colIndex].selecionado = prev[colIndex].modoMultiplo
+        ? opcoes
+        : opcoes.length
+        ? [opcoes[0]]
+        : [];
+      return novo;
+    });
+  };
+
+  const desmarcarTudo = (colIndex) => {
+    setConfigs((prev) => {
+      const novo = [...prev];
+      novo[colIndex].selecionado = [];
+      return novo;
+    });
+  };
+
+  const atualizarFiltro = (colIndex, texto) => {
+    setConfigs((prev) => {
+      const novo = [...prev];
+      novo[colIndex].filtro = texto;
+      return novo;
+    });
+  };
+
+  // Gera as opções possíveis com base nas seleções cruzadas
+  const getOpcoesFiltradas = (colIndex) => {
+    const filtroAtual = colunas[colIndex];
+    const outrosFiltros = colunas
+      .map((col, i) => ({ col, valores: configs[i].selecionado }))
+      .filter((_, i) => i !== colIndex && configs[i].selecionado.length > 0);
+
+    const filtrado = dados.filter((item) =>
+      outrosFiltros.every(({ col, valores }) => valores.includes(item[col]))
+    );
+
+    const unicos = [...new Set(filtrado.map((item) => item[filtroAtual]))];
+
+    const textoFiltro = configs[colIndex].filtro.toLowerCase();
+    return unicos.filter((op) => op.toLowerCase().includes(textoFiltro));
+  };
+
+  return (
+    <div className="card-wrapper">
+      <Card title="Filtros Dinâmicos: Comida, Ingrediente e Preço">
+        <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+          {colunas.map((label, colIndex) => {
+            const opcoesFiltradas = getOpcoesFiltradas(colIndex);
+            const config = configs[colIndex];
+            return (
+              <div
+                key={label}
+                style={{
+                  width: "240px",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div style={{ marginBottom: "6px" }}>
+                  <Button
+                    label={
+                      config.modoMultiplo ? "Múltiplo: ON" : "Múltiplo: OFF"
+                    }
+                    icon={config.modoMultiplo ? "pi pi-clone" : "pi pi-user"}
+                    className={
+                      config.modoMultiplo
+                        ? "p-button-warning p-button-sm"
+                        : "p-button-info p-button-sm"
+                    }
+                    onClick={() => toggleModo(colIndex)}
+                    style={{
+                      fontSize: "0.65rem",
+                      height: "26px",
+                      width: "100%",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{ display: "flex", gap: "6px", marginBottom: "6px" }}
+                >
+                  <Button
+                    icon="pi pi-check-square"
+                    className="p-button-success p-button-sm"
+                    style={{ height: "26px", flex: 1 }}
+                    onClick={() => selecionarTudo(colIndex, opcoesFiltradas)}
+                  />
+                  <Button
+                    icon="pi pi-times-circle"
+                    className="p-button-danger p-button-sm"
+                    style={{ height: "26px", flex: 1 }}
+                    onClick={() => desmarcarTudo(colIndex)}
+                  />
+                </div>
+                <InputText
+                  placeholder={`Pesquisar ${label}...`}
+                  value={config.filtro}
+                  onChange={(e) => atualizarFiltro(colIndex, e.target.value)}
+                  className="p-inputtext-sm"
+                  style={{ marginBottom: "6px" }}
+                />
+                <ScrollPanel style={{ height: "160px" }}>
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}
+                  >
+                    {opcoesFiltradas.map((item, i) => (
+                      <Button
+                        key={i}
+                        label={item}
+                        onClick={() => toggleItem(colIndex, item)}
+                        className={
+                          config.selecionado.includes(item)
+                            ? "p-button-success p-button-sm"
+                            : "p-button-outlined p-button-sm"
+                        }
+                        style={{
+                          width: "calc(50% - 4px)",
+                          fontSize: "0.65rem",
+                          height: "28px",
+                        }}
+                      />
+                    ))}
+                  </div>
+                </ScrollPanel>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default FiltrosComida;
