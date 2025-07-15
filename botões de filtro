@@ -192,3 +192,59 @@ const BotoesComidas = () => {
 };
 
 export default BotoesComidas;
+
+
+/*fazer elas ficarem juntas*/
+
+<Card title="Selecione Comidas por Coluna">
+  {/* Div principal que agrupa TODAS as colunas e os botões laterais */}
+  <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+    
+    {/* Início do loop para renderizar cada coluna */}
+    {configs.map((col, colIndex) => {
+      return (
+        // Cada coluna completa (modo, ações, filtro e scroll)
+        <div
+          key={colIndex}
+          style={{
+            display: "flex",
+            flexDirection: "column", // empilha os elementos verticalmente
+            width: "240px", // largura fixa para alinhar com as demais colunas
+          }}
+        >
+          {/* Botão de modo múltiplo (linha superior da coluna) */}
+          <div style={{ marginBottom: "6px" }}>
+            <Button ... />
+          </div>
+
+          {/* Linha com os botões "Selecionar Tudo" e "Desmarcar Tudo" */}
+          <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+            <Button ... />
+            <Button ... />
+          </div>
+
+          {/* Campo de pesquisa */}
+          <InputText ... />
+
+          {/* Painel de rolagem com os botões de comida */}
+          <ScrollPanel style={{ height: "160px", width: "100%" }}>
+            {/* Grid dos botões dentro do painel */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+              {/* Botões gerados dinamicamente */}
+              ...
+            </div>
+          </ScrollPanel>
+        </div>
+      );
+    })}
+    
+    {/* Coluna final com os botões Confirmar e Cancelar */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <Button ... />
+      <Button ... />
+    </div>
+  </div>
+</Card>
+
+
+
