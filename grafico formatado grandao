@@ -1,0 +1,62 @@
+import React from "react";
+import ReactECharts from "echarts-for-react";
+
+const GraficoLayout = () => {
+  // Exemplo de configuração de gráfico (pode adaptar)
+  const optionGenerico = (titulo) => ({
+    title: { text: titulo },
+    tooltip: {},
+    xAxis: { data: ["A", "B", "C", "D"] },
+    yAxis: {},
+    series: [{ type: "bar", data: [5, 20, 36, 10] }],
+  });
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        height: "600px",
+        gap: "16px",
+      }}
+    >
+      {/* Gráfico maior à esquerda */}
+      <div style={{ flex: 2 }}>
+        <ReactECharts
+          option={optionGenerico("Gráfico Principal")}
+          style={{ height: "100%", width: "100%" }}
+        />
+      </div>
+
+      {/* Coluna da direita com 3 gráficos menores empilhados */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <ReactECharts
+            option={optionGenerico("Gráfico 1")}
+            style={{ height: "100%", width: "100%" }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <ReactECharts
+            option={optionGenerico("Gráfico 2")}
+            style={{ height: "100%", width: "100%" }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <ReactECharts
+            option={optionGenerico("Gráfico 3")}
+            style={{ height: "100%", width: "100%" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GraficoLayout;
