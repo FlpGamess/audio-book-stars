@@ -192,3 +192,33 @@ const FiltrosComida = () => {
 };
 
 export default FiltrosComida;
+
+
+
+/*--------------------------------- */
+/*mudar dps pra aceitar vetor nos ingredientes*/
+
+
+const filtrado = dados.filter((item) =>
+  outrosFiltros.every(({ col, valores }) => {
+    const valorDoItem = item[col];
+
+    // Se for array (ex: ["Queijo", "Tomate"]), verifica se há interseção
+    if (Array.isArray(valorDoItem)) {
+      return valorDoItem.some((v) => valores.includes(v));
+    }
+
+    // Se for valor simples (string), faz comparação direta
+    return valores.includes(valorDoItem);
+  })
+);
+
+
+const unicos = [
+  ...new Set(
+    filtrado.flatMap((item) =>
+      Array.isArray(item[filtroAtual]) ? item[filtroAtual] : [item[filtroAtual]]
+    )
+  ),
+];
+
