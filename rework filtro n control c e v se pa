@@ -1,0 +1,64 @@
+import React, { useState } from "react";
+import { MultiSelect } from "primereact/multiselect";
+import { Button } from "primereact/button";
+
+const Componente = () => {
+  const opcoes = Array.from({ length: 10 }, (_, i) => ({
+    label: `Item ${i + 1}`,
+    value: `item${i + 1}`,
+  }));
+
+  const [modoUnico, setModoUnico] = useState(false);
+  const [selecionados, setSelecionados] = useState([]);
+
+  const handleChange = (e) => {
+    if (modoUnico) {
+      // Se for modo único, só salva o primeiro selecionado
+      const novoValor = Array.isArray(e.value) ? e.value[0] : e.value;
+      setSelecionados(novoValor ? [novoValor] : []);
+    } else {
+      setSelecionados(e.value || []);
+    }
+  };
+
+  return (
+    <div className="card flex flex-column gap-2">
+      <Button
+        label={modoUnico ? "Modo Múltiplo" : "Modo Único"}
+        onClick={() => setModoUnico((prev) => !prev)}
+      />
+
+      <MultiSelect
+        value={selecionados}
+        options={opcoes}
+        onChange={handleChange}
+        optionLabel="label"
+        placeholder={modoUnico ? "Selecione 1 item" : "Selecione vários"}
+        display="chip"
+        filter
+        maxSelectedLabels={4}
+        className="w-full md:w-20rem"
+      />
+    </div>
+  );
+};
+
+export default Componente;
+
+
+
+
+/* Limita a altura da área dos chips e adiciona scroll */
+.custom-multiselect .p-multiselect-token {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Garante que a área de chips não quebre o layout */
+.custom-multiselect .p-multiselect-token-container {
+  flex-wrap: nowrap;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: 100px;
+}
