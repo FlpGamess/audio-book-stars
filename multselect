@@ -1,0 +1,83 @@
+import React, { useState } from "react";
+import { MultiSelect } from "primereact/multiselect";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+
+const Componente = () => {
+  const dados = [
+    { comida: "Pizza", preco: 25 },
+    { comida: "Hambúrguer", preco: 20 },
+    { comida: "Sushi", preco: 35 },
+    { comida: "Pizza", preco: 30 },
+    { comida: "Sushi", preco: 40 },
+    { comida: "Hambúrguer", preco: 25 },
+  ];
+
+  const [comidasSelecionadas, setComidasSelecionadas] = useState([]);
+  const [precosSelecionados, setPrecosSelecionados] = useState([]);
+
+  // Filtragem cruzada para opções disponíveis
+  const dadosFiltradosPorPreco = precosSelecionados.length
+    ? dados.filter((d) => precosSelecionados.includes(d.preco))
+    : dados;
+
+  const dadosFiltradosPorComida = comidasSelecionadas.length
+    ? dados.filter((d) => comidasSelecionadas.includes(d.comida))
+    : dados;
+
+  const opcoesComida = [
+    ...new Set(dadosFiltradosPorPreco.map((d) => d.comida)),
+  ].map((c) => ({ label: c, value: c }));
+
+  const opcoesPreco = [
+    ...new Set(dadosFiltradosPorComida.map((d) => d.preco)),
+  ].map((p) => ({ label: `R$ ${p}`, value: p }));
+
+  // Dados filtrados com base nos dois seletores
+  const dadosFiltrados = dados.filter((d) => {
+    const comidaOK =
+      comidasSelecionadas.length === 0 ||
+      comidasSelecionadas.includes(d.comida);
+    const precoOK =
+      precosSelecionados.length === 0 || precosSelecionados.includes(d.preco);
+    return comidaOK && precoOK;
+  });
+
+  return (
+    <div className="card flex flex-column gap-3 w-full md:w-30rem">
+      <h3>Filtro por comida:</h3>
+      <MultiSelect
+        value={comidasSelecionadas}
+        options={opcoesComida}
+        onChange={(e) => setComidasSelecionadas(e.value)}
+        placeholder="Selecione comidas"
+        filter
+        display="chip"
+        className="w-full"
+      />
+
+      <h3>Filtro por preço:</h3>
+      <MultiSelect
+        value={precosSelecionados}
+        options={opcoesPreco}
+        onChange={(e) => setPrecosSelecionados(e.value)}
+        placeholder="Selecione preços"
+        filter
+        display="chip"
+        className="w-full"
+      />
+
+      <h3>Resultados filtrados:</h3>
+      <DataTable
+        value={dadosFiltrados}
+        className="w-full"
+        emptyMessage="Nenhum resultado encontrado."
+      >
+        <Column field="comida" header="Comida" />
+        <Column field="preco" header="Preço (R$)" />
+      </DataTable>
+    </div>
+  );
+};
+
+export default Componente;
