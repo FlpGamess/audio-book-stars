@@ -5,37 +5,80 @@ import { Button } from "primereact/button";
 
 const GraficoComidas = () => {
   const dadosOriginais = [
-    { comida: "Pizza", vendas: 150 },
-    { comida: "Sushi", vendas: 100 },
-    { comida: "Hambúrguer", vendas: 200 },
-    { comida: "Lasanha", vendas: 75 },
-    { comida: "Tacos", vendas: 120 },
-    { comida: "Pizza", vendas: 120 },
-    { comida: "Sushi", vendas: 150 },
+    { comida: "Pizza", vendas: 150, tipo: "Massa" },
+    { comida: "Sushi", vendas: 100, tipo: "Japonesa" },
+    { comida: "Hambúrguer", vendas: 200, tipo: "Fast-food" },
+    { comida: "Lasanha", vendas: 75, tipo: "Massa" },
+    { comida: "Tacos", vendas: 120, tipo: "Mexicana" },
+    { comida: "Pizza", vendas: 120, tipo: "Massa" },
+    { comida: "Sushi", vendas: 150, tipo: "Japonesa" },
   ];
 
   const [comidasSelecionadas, setComidasSelecionadas] = useState([]);
   const [vendasSelecionadas, setVendasSelecionadas] = useState([]);
+  const [tiposSelecionados, setTiposSelecionados] = useState([]);
 
-  // Estados para alternar entre modos
   const [modoComidaMultiplo, setModoComidaMultiplo] = useState(true);
   const [modoVendaMultiplo, setModoVendaMultiplo] = useState(true);
+  const [modoTipoMultiplo, setModoTipoMultiplo] = useState(true);
 
-  // Filtros interdependentes
+  // 🔁 Dados com base em filtros cruzados
+
+  const isok = (filtro, code, dado) => {
+    if (!filtro.length) return true;
+    return filtro.includes(dado[code]);
+  };
+
+  const dadosFiltrados = dadosOriginais.filter((item) => {
+    return (
+      isok(comidasSelecionadas, "comida", item) &&
+      isok(vendasSelecionadas, "vendas", item) &&
+      isok(tiposSelecionados, "tipo", item)
+    );
+  });
+
+  // 🔍 Gerar opções com base nos dados filtrados cruzadamente
+
   const dadosParaFiltroComida =
-    vendasSelecionadas.length === 0
+    vendasSelecionadas.length === 0 && tiposSelecionados.length === 0
       ? dadosOriginais
-      : dadosOriginais.filter((item) =>
-          vendasSelecionadas.includes(item.vendas)
-        );
+      : dadosOriginais.filter((item) => {
+          const vendaMatch =
+            vendasSelecionadas.length === 0 ||
+            vendasSelecionadas.includes(item.vendas);
+          const tipoMatch =
+            tiposSelecionados.length === 0 ||
+            tiposSelecionados.includes(item.tipo);
+          return vendaMatch && tipoMatch;
+        });
 
   const dadosParaFiltroVenda =
-    comidasSelecionadas.length === 0
+    comidasSelecionadas.length === 0 && tiposSelecionados.length === 0
       ? dadosOriginais
-      : dadosOriginais.filter((item) =>
-          comidasSelecionadas.includes(item.comida)
-        );
+      : dadosOriginais.filter((item) => {
+          const comidaMatch =
+            comidasSelecionadas.length === 0 ||
+            comidasSelecionadas.includes(item.comida);
+          const tipoMatch =
+            tiposSelecionados.length === 0 ||
+            tiposSelecionados.includes(item.tipo);
+          return comidaMatch && tipoMatch;
+        });
 
+  const dadosParaFiltroTipo =
+    comidasSelecionadas.length === 0 && vendasSelecionadas.length === 0
+      ? dadosOriginais
+      : dadosOriginais.filter((item) => {
+          const comidaMatch =
+            comidasSelecionadas.length === 0 ||
+            comidasSelecionadas.includes(item.comida);
+          const vendaMatch =
+            vendasSelecionadas.length === 0 ||
+            vendasSelecionadas.includes(item.vendas);
+          return comidaMatch && vendaMatch;
+        });
+
+  // 🔽 Opções únicas
   const opcoesComida = [
     ...new Set(dadosParaFiltroComida.map((d) => d.comida)),
   ].map((comida) => ({ label: comida, value: comida }));
@@ -44,40 +87,9 @@ const GraficoComidas = () => {
     ...new Set(dadosParaFiltroVenda.map((d) => d.vendas)),
   ].map((venda) => ({ label: `R$ ${venda}`, value: venda }));
 
-  // Dados exibidos
-  const dadosFiltrados = dadosOriginais.filter((item) => {
-    let comidaOK = false;
-    let vendaOK = false;
-
-    // Verifica se a comida é válida
-    if (comidasSelecionadas.length === 0) {
-      comidaOK = true; // Nenhum filtro -> aceita todas
-    } else {
-      if (comidasSelecionadas.includes(item.comida)) {
-        comidaOK = true;
-      } else {
-        comidaOK = false;
-      }
-    }
-
-    // Verifica se a venda é válida
-    if (vendasSelecionadas.length === 0) {
-      vendaOK = true; // Nenhum filtro -> aceita todas
-    } else {
-      if (vendasSelecionadas.includes(item.vendas)) {
-        vendaOK = true;
-      } else {
-        vendaOK = false;
-      }
-    }
-
-    // Retorna true se passar nos dois filtros
-    if (comidaOK && vendaOK) {
-      return true;
-    } else {
-      return false;
-    }
-  });
+  const opcoesTipo = [...new Set(dadosParaFiltroTipo.map((d) => d.tipo))].map(
+    (tipo) => ({ label: tipo, value: tipo })
+  );
 
   const chartData = {
     labels: dadosFiltrados.map((item) => item.comida),
@@ -98,17 +110,23 @@ const GraficoComidas = () => {
     },
   };
 
-  // Alternar modo comida
+  // Alternar modo Comida
   const toggleModoComida = () => {
     const novoModo = !modoComidaMultiplo;
     setModoComidaMultiplo(novoModo);
     if (!novoModo && comidasSelecionadas.length > 1) {
-      // Se for pra modo único, manter só o primeiro
       setComidasSelecionadas([comidasSelecionadas[0]]);
     }
   };
+  const toggleModoTipo = () => {
+    const novoModo = !modoTipoMultiplo;
+    setModoTipoMultiplo(novoModo);
+    if (!novoModo && tiposSelecionados.length > 1) {
+      setTiposSelecionados([tiposSelecionados[0]]);
+    }
+  };
 
-  // Alternar modo venda
+  // Alternar modo Venda
   const toggleModoVenda = () => {
     const novoModo = !modoVendaMultiplo;
     setModoVendaMultiplo(novoModo);
@@ -130,7 +148,11 @@ const GraficoComidas = () => {
           value={comidasSelecionadas}
           options={opcoesComida}
           onChange={(e) => {
-            const valor = e.value || [];
+            let valor = e.value;
+            if (valor === null || valor === undefined) {
+              valor = [];
+            }
+
             setComidasSelecionadas(
               modoComidaMultiplo ? valor : valor.slice(-1)
             );
@@ -153,14 +175,43 @@ const GraficoComidas = () => {
           value={vendasSelecionadas}
           options={opcoesVenda}
           onChange={(e) => {
-            const valor = e.value || [];
+            let valor = e.value;
+            if (valor === null || valor === undefined) {
+              valor = [];
+            }
+
             setVendasSelecionadas(modoVendaMultiplo ? valor : valor.slice(-1));
           }}
           placeholder="Selecione valores"
           display="chip"
           filter
           className="w-full md:w-20rem"
-        /> 
+        />
+      </div>
+
+      <div>
+        <h3>Filtrar por tipo de comida:</h3>
+        <Button
+          label={`Modo: ${modoTipoMultiplo ? "Múltiplo" : "Único"}`}
+          onClick={toggleModoTipo}
+          className="mb-2"
+        />
+        <MultiSelect
+          value={tiposSelecionados}
+          options={opcoesTipo}
+          onChange={(e) => {
+            let valor = e.value;
+            if (valor === null || valor === undefined) {
+              valor = [];
+            }
+
+            setTiposSelecionados(modoTipoMultiplo ? valor : valor.slice(-1));
+          }}
+          placeholder="Selecione tipos"
+          display="chip"
+          filter
+          className="w-full md:w-20rem"
+        />
       </div>
 
       <Chart type="bar" data={chartData} options={chartOptions} />
