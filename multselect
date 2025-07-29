@@ -1,83 +1,171 @@
 import React, { useState } from "react";
+import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+import { Button } from "primereact/button";
 
-const Componente = () => {
-  const dados = [
-    { comida: "Pizza", preco: 25 },
-    { comida: "Hambúrguer", preco: 20 },
-    { comida: "Sushi", preco: 35 },
-    { comida: "Pizza", preco: 30 },
-    { comida: "Sushi", preco: 40 },
-    { comida: "Hambúrguer", preco: 25 },
+const GraficoComidas = () => {
+  const dadosOriginais = [
+    { comida: "Pizza", vendas: 150 },
+    { comida: "Sushi", vendas: 100 },
+    { comida: "Hambúrguer", vendas: 200 },
+    { comida: "Lasanha", vendas: 75 },
+    { comida: "Tacos", vendas: 120 },
+    { comida: "Pizza", vendas: 120 },
+    { comida: "Sushi", vendas: 150 },
   ];
 
   const [comidasSelecionadas, setComidasSelecionadas] = useState([]);
-  const [precosSelecionados, setPrecosSelecionados] = useState([]);
+  const [vendasSelecionadas, setVendasSelecionadas] = useState([]);
 
-  // Filtragem cruzada para opções disponíveis
-  const dadosFiltradosPorPreco = precosSelecionados.length
-    ? dados.filter((d) => precosSelecionados.includes(d.preco))
-    : dados;
+  // Estados para alternar entre modos
+  const [modoComidaMultiplo, setModoComidaMultiplo] = useState(true);
+  const [modoVendaMultiplo, setModoVendaMultiplo] = useState(true);
 
-  const dadosFiltradosPorComida = comidasSelecionadas.length
-    ? dados.filter((d) => comidasSelecionadas.includes(d.comida))
-    : dados;
+  // Filtros interdependentes
+  const dadosParaFiltroComida =
+    vendasSelecionadas.length === 0
+      ? dadosOriginais
+      : dadosOriginais.filter((item) =>
+          vendasSelecionadas.includes(item.vendas)
+        );
+
+  const dadosParaFiltroVenda =
+    comidasSelecionadas.length === 0
+      ? dadosOriginais
+      : dadosOriginais.filter((item) =>
+          comidasSelecionadas.includes(item.comida)
+        );
 
   const opcoesComida = [
-    ...new Set(dadosFiltradosPorPreco.map((d) => d.comida)),
-  ].map((c) => ({ label: c, value: c }));
+    ...new Set(dadosParaFiltroComida.map((d) => d.comida)),
+  ].map((comida) => ({ label: comida, value: comida }));
 
-  const opcoesPreco = [
-    ...new Set(dadosFiltradosPorComida.map((d) => d.preco)),
-  ].map((p) => ({ label: `R$ ${p}`, value: p }));
+  const opcoesVenda = [
+    ...new Set(dadosParaFiltroVenda.map((d) => d.vendas)),
+  ].map((venda) => ({ label: `R$ ${venda}`, value: venda }));
 
-  // Dados filtrados com base nos dois seletores
-  const dadosFiltrados = dados.filter((d) => {
-    const comidaOK =
-      comidasSelecionadas.length === 0 ||
-      comidasSelecionadas.includes(d.comida);
-    const precoOK =
-      precosSelecionados.length === 0 || precosSelecionados.includes(d.preco);
-    return comidaOK && precoOK;
+  // Dados exibidos
+  const dadosFiltrados = dadosOriginais.filter((item) => {
+    let comidaOK = false;
+    let vendaOK = false;
+
+    // Verifica se a comida é válida
+    if (comidasSelecionadas.length === 0) {
+      comidaOK = true; // Nenhum filtro -> aceita todas
+    } else {
+      if (comidasSelecionadas.includes(item.comida)) {
+        comidaOK = true;
+      } else {
+        comidaOK = false;
+      }
+    }
+
+    // Verifica se a venda é válida
+    if (vendasSelecionadas.length === 0) {
+      vendaOK = true; // Nenhum filtro -> aceita todas
+    } else {
+      if (vendasSelecionadas.includes(item.vendas)) {
+        vendaOK = true;
+      } else {
+        vendaOK = false;
+      }
+    }
+
+    // Retorna true se passar nos dois filtros
+    if (comidaOK && vendaOK) {
+      return true;
+    } else {
+      return false;
+    }
   });
 
+  const chartData = {
+    labels: dadosFiltrados.map((item) => item.comida),
+    datasets: [
+      {
+        label: "Vendas",
+        data: dadosFiltrados.map((item) => item.vendas),
+        backgroundColor: "#42A5F5",
+      },
+    ],
+  };
+
+  const chartOptions = {
+    plugins: {
+      legend: {
+        labels: { color: "#333" },
+      },
+    },
+  };
+
+  // Alternar modo comida
+  const toggleModoComida = () => {
+    const novoModo = !modoComidaMultiplo;
+    setModoComidaMultiplo(novoModo);
+    if (!novoModo && comidasSelecionadas.length > 1) {
+      // Se for pra modo único, manter só o primeiro
+      setComidasSelecionadas([comidasSelecionadas[0]]);
+    }
+  };
+
+  // Alternar modo venda
+  const toggleModoVenda = () => {
+    const novoModo = !modoVendaMultiplo;
+    setModoVendaMultiplo(novoModo);
+    if (!novoModo && vendasSelecionadas.length > 1) {
+      setVendasSelecionadas([vendasSelecionadas[0]]);
+    }
+  };
+
   return (
-    <div className="card flex flex-column gap-3 w-full md:w-30rem">
-      <h3>Filtro por comida:</h3>
-      <MultiSelect
-        value={comidasSelecionadas}
-        options={opcoesComida}
-        onChange={(e) => setComidasSelecionadas(e.value)}
-        placeholder="Selecione comidas"
-        filter
-        display="chip"
-        className="w-full"
-      />
+    <div className="card flex flex-column gap-4">
+      <div>
+        <h3>Filtrar por comida:</h3>
+        <Button
+          label={`Modo: ${modoComidaMultiplo ? "Múltiplo" : "Único"}`}
+          onClick={toggleModoComida}
+          className="mb-2"
+        />
+        <MultiSelect
+          value={comidasSelecionadas}
+          options={opcoesComida}
+          onChange={(e) => {
+            const valor = e.value || [];
+            setComidasSelecionadas(
+              modoComidaMultiplo ? valor : valor.slice(-1)
+            );
+          }}
+          placeholder="Selecione comidas"
+          display="chip"
+          filter
+          className="w-full md:w-20rem"
+        />
+      </div>
 
-      <h3>Filtro por preço:</h3>
-      <MultiSelect
-        value={precosSelecionados}
-        options={opcoesPreco}
-        onChange={(e) => setPrecosSelecionados(e.value)}
-        placeholder="Selecione preços"
-        filter
-        display="chip"
-        className="w-full"
-      />
+      <div>
+        <h3>Filtrar por valor de venda:</h3>
+        <Button
+          label={`Modo: ${modoVendaMultiplo ? "Múltiplo" : "Único"}`}
+          onClick={toggleModoVenda}
+          className="mb-2"
+        />
+        <MultiSelect
+          value={vendasSelecionadas}
+          options={opcoesVenda}
+          onChange={(e) => {
+            const valor = e.value || [];
+            setVendasSelecionadas(modoVendaMultiplo ? valor : valor.slice(-1));
+          }}
+          placeholder="Selecione valores"
+          display="chip"
+          filter
+          className="w-full md:w-20rem"
+        /> 
+      </div>
 
-      <h3>Resultados filtrados:</h3>
-      <DataTable
-        value={dadosFiltrados}
-        className="w-full"
-        emptyMessage="Nenhum resultado encontrado."
-      >
-        <Column field="comida" header="Comida" />
-        <Column field="preco" header="Preço (R$)" />
-      </DataTable>
+      <Chart type="bar" data={chartData} options={chartOptions} />
     </div>
   );
 };
 
-export default Componente;
+export default GraficoComidas;
