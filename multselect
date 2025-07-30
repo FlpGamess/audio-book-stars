@@ -39,44 +39,45 @@ const GraficoComidas = () => {
 
   // 🔍 Gerar opções com base nos dados filtrados cruzadamente
 
-  const dadosParaFiltroComida =
-    vendasSelecionadas.length === 0 && tiposSelecionados.length === 0
-      ? dadosOriginais
-      : dadosOriginais.filter((item) => {
-          const vendaMatch =
-            vendasSelecionadas.length === 0 ||
-            vendasSelecionadas.includes(item.vendas);
-          const tipoMatch =
-            tiposSelecionados.length === 0 ||
-            tiposSelecionados.includes(item.tipo);
-          return vendaMatch && tipoMatch;
-        });
+  const dadosFiltro = (filtro1, filtro2, chave1, chave2, dados) => {
+    const isOk = (filtro, chave, item) => {
+      if (filtro.length === 0) {
+        return true;
+      } else if (filtro.includes(item[chave])) {
+        return true;
+      } else {
+        return false;
+      }
+    };
 
-  const dadosParaFiltroVenda =
-    comidasSelecionadas.length === 0 && tiposSelecionados.length === 0
-      ? dadosOriginais
-      : dadosOriginais.filter((item) => {
-          const comidaMatch =
-            comidasSelecionadas.length === 0 ||
-            comidasSelecionadas.includes(item.comida);
-          const tipoMatch =
-            tiposSelecionados.length === 0 ||
-            tiposSelecionados.includes(item.tipo);
-          return comidaMatch && tipoMatch;
-        });
+    return dados.filter((item) => {
+      return isOk(filtro1, chave1, item) && isOk(filtro2, chave2, item);
+    });
+  };
 
-  const dadosParaFiltroTipo =
-    comidasSelecionadas.length === 0 && vendasSelecionadas.length === 0
-      ? dadosOriginais
-      : dadosOriginais.filter((item) => {
-          const comidaMatch =
-            comidasSelecionadas.length === 0 ||
-            comidasSelecionadas.includes(item.comida);
-          const vendaMatch =
-            vendasSelecionadas.length === 0 ||
-            vendasSelecionadas.includes(item.vendas);
-          return comidaMatch && vendaMatch;
-        });
+  const dadosParaFiltroComida = dadosFiltro(
+    vendasSelecionadas,
+    tiposSelecionados,
+    "vendas",
+    "tipo",
+    dadosOriginais
+  );
+
+  const dadosParaFiltroVenda = dadosFiltro(
+    comidasSelecionadas,
+    tiposSelecionados,
+    "comida",
+    "tipo",
+    dadosOriginais
+  );
+
+  const dadosParaFiltroTipo = dadosFiltro(
+    comidasSelecionadas,
+    vendasSelecionadas,
+    "comida",
+    "vendas",
+    dadosOriginais
+  );
 
   // 🔽 Opções únicas
   const opcoesComida = [
