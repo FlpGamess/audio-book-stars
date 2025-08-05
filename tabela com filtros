@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { MultiSelect } from "primereact/multiselect";
+import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 
 const TabelaComidas = () => {
@@ -48,47 +49,61 @@ const TabelaComidas = () => {
     { comida: "Yakissoba", preco: 29, tipo: "Oriental" },
   ];
 
-  // Estado do filtro e modo
+  // Estado filtro de tipos (multi/único)
   const [tiposSelecionados, setTiposSelecionados] = useState([]);
   const [modoMultiplo, setModoMultiplo] = useState(true);
 
-  // Opções únicas de tipo para o MultiSelect
+  // Estado filtro de preço (único)
+  const [precoSelecionado, setPrecoSelecionado] = useState(null);
+
+  // Opções únicas para tipo
   const opcoesTipo = [...new Set(dados.map((d) => d.tipo))].map((tipo) => ({
     label: tipo,
     value: tipo,
   }));
 
-  // Alternar entre modo único e múltiplo
+  // Opções únicas para preço (ordena para melhorar UX)
+  const opcoesPreco = [...new Set(dados.map((d) => d.preco))]
+    .sort((a, b) => a - b)
+    .map((preco) => ({
+      label: `R$ ${preco}`,
+      value: preco,
+    }));
+
+  // Alterna modo multi/único para filtro tipo
   const alternarModo = () => {
     const novoModo = !modoMultiplo;
     setModoMultiplo(novoModo);
-    if (!novoModo && tiposSelecionados.length > 1) {
-      // Se mudar para modo único, mantém apenas o último selecionado
-      setTiposSelecionados([tiposSelecionados.at(-1)]);
-    }
+    setTiposSelecionados([]); // limpa seleção ao mudar modo
   };
 
-  // Filtrar os dados com base nos tipos selecionados
-  const dadosFiltrados =
-    tiposSelecionados.length === 0
-      ? dados
-      : dados.filter((item) => tiposSelecionados.includes(item.tipo));
+  // Filtra dados combinando os dois filtros (tipo e preço)
+  const dadosFiltrados = dados.filter((item) => {
+    // Verifica filtro tipo
+    const filtroTipoOK =
+      tiposSelecionados.length === 0 || tiposSelecionados.includes(item.tipo);
 
-  // Gerar todas as colunas dinamicamente
+    // Verifica filtro preço
+    const filtroPrecoOK =
+      precoSelecionado === null || precoSelecionado === item.preco;
+
+    return filtroTipoOK && filtroPrecoOK;
+  });
+
+  // Colunas dinâmicas com todas as chaves únicas
   const colunasDinamicas = [
     ...new Set(dados.flatMap((obj) => Object.keys(obj))),
   ];
 
   return (
     <div className="card flex flex-column gap-4">
-      <h3>Filtro por Tipo:</h3>
-
+      {/* Filtro por Tipo */}
       <div className="flex flex-column gap-2 md:w-20rem">
+        <h3>Filtro por Tipo:</h3>
         <Button
           label={`Modo: ${modoMultiplo ? "Múltiplo" : "Único"}`}
           onClick={alternarModo}
         />
-
         <MultiSelect
           value={tiposSelecionados}
           options={opcoesTipo}
@@ -103,6 +118,20 @@ const TabelaComidas = () => {
         />
       </div>
 
+      {/* Filtro por Preço */}
+      <div className="flex flex-column gap-2 md:w-20rem">
+        <h3>Filtro por Preço:</h3>
+        <Dropdown
+          value={precoSelecionado}
+          options={opcoesPreco}
+          onChange={(e) => setPrecoSelecionado(e.value)}
+          placeholder="Selecione preço"
+          showClear
+          className="w-full"
+        />
+      </div>
+
+      {/* Tabela filtrada */}
       <DataTable
         value={dadosFiltrados}
         paginator
