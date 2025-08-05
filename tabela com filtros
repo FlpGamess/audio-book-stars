@@ -1,0 +1,54 @@
+// Importações necessárias do React e do PrimeReact
+import React from "react";
+import { DataTable } from "primereact/datatable"; // Componente de tabela do PrimeReact
+import { Column } from "primereact/column";       // Define cada coluna da tabela
+
+const TabelaComidas = () => {
+  // Dados simulando um "dataframe", com algumas chaves ausentes (como 'acompanhamento' em alguns objetos)
+  const dados = [
+    { comida: "Pizza", preco: 35, acompanhamento: "Refrigerante", tipo: "Massa" },
+    { comida: "Hambúrguer", preco: 28, acompanhamento: "Batata Frita", tipo: "Fast Food" },
+    { comida: "Sushi", preco: 42, tipo: "Oriental" }, // Sem acompanhamento
+    { comida: "Lasanha", preco: 30, acompanhamento: "Salada Verde", tipo: "Massa" },
+    { comida: "Tacos", preco: 25, tipo: "Mexicana" }, // Sem acompanhamento
+    { comida: "Churrasco", preco: 50, acompanhamento: "Farofa", tipo: "Brasileira" },
+    { comida: "Feijoada", preco: 38, tipo: "Brasileira" }, // Sem acompanhamento
+    { comida: "Strogonoff", preco: 32, acompanhamento: "Batata Palha", tipo: "Brasileira" },
+    { comida: "Nhoque", preco: 27, acompanhamento: "Molho de tomate", tipo: "Massa" },
+    { comida: "Yakissoba", preco: 29, tipo: "Oriental" } // Sem acompanhamento
+  ];
+
+  // Geração de todas as chaves únicas presentes nos objetos do array.
+  // Isso garante que, mesmo se o primeiro item não tiver todas as colunas, elas ainda aparecerão.
+  const colunasDinamicas = [...new Set(
+    dados.flatMap(obj => Object.keys(obj)) // flatMap pega todas as chaves de todos os objetos
+  )];
+
+  return (
+    <div className="card">
+      <h3>Tabela de Comidas (colunas automáticas)</h3>
+
+      {/* DataTable é o componente de tabela do PrimeReact */}
+      <DataTable
+        value={dados}                  // Array de dados a ser exibido
+        paginator                     // Ativa paginação automática
+        rows={5}                      // Número de linhas por página
+        className="w-full"           // Ocupa toda a largura do container
+        responsiveLayout="scroll"    // Permite scroll horizontal em telas menores
+      >
+
+        {/* Aqui, cada chave única se transforma em uma coluna automaticamente */}
+        {colunasDinamicas.map((chave) => (
+          <Column
+            key={chave} // Chave única exigida pelo React
+            field={chave} // Nome da propriedade no objeto
+            header={chave.charAt(0).toUpperCase() + chave.slice(1)} // Capitaliza o nome do header
+          />
+        ))}
+      </DataTable>
+    </div>
+  );
+};
+
+// Exporta o componente para uso em outro lugar do app
+export default TabelaComidas;
