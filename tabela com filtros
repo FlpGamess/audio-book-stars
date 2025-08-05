@@ -1,48 +1,120 @@
-// Importações necessárias do React e do PrimeReact
-import React from "react";
-import { DataTable } from "primereact/datatable"; // Componente de tabela do PrimeReact
-import { Column } from "primereact/column";       // Define cada coluna da tabela
+import React, { useState } from "react";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { MultiSelect } from "primereact/multiselect";
+import { Button } from "primereact/button";
 
 const TabelaComidas = () => {
-  // Dados simulando um "dataframe", com algumas chaves ausentes (como 'acompanhamento' em alguns objetos)
   const dados = [
-    { comida: "Pizza", preco: 35, acompanhamento: "Refrigerante", tipo: "Massa" },
-    { comida: "Hambúrguer", preco: 28, acompanhamento: "Batata Frita", tipo: "Fast Food" },
-    { comida: "Sushi", preco: 42, tipo: "Oriental" }, // Sem acompanhamento
-    { comida: "Lasanha", preco: 30, acompanhamento: "Salada Verde", tipo: "Massa" },
-    { comida: "Tacos", preco: 25, tipo: "Mexicana" }, // Sem acompanhamento
-    { comida: "Churrasco", preco: 50, acompanhamento: "Farofa", tipo: "Brasileira" },
-    { comida: "Feijoada", preco: 38, tipo: "Brasileira" }, // Sem acompanhamento
-    { comida: "Strogonoff", preco: 32, acompanhamento: "Batata Palha", tipo: "Brasileira" },
-    { comida: "Nhoque", preco: 27, acompanhamento: "Molho de tomate", tipo: "Massa" },
-    { comida: "Yakissoba", preco: 29, tipo: "Oriental" } // Sem acompanhamento
+    {
+      comida: "Pizza",
+      preco: 35,
+      acompanhamento: "Refrigerante",
+      tipo: "Massa",
+    },
+    {
+      comida: "Hambúrguer",
+      preco: 28,
+      acompanhamento: "Batata Frita",
+      tipo: "Fast Food",
+    },
+    { comida: "Sushi", preco: 42, tipo: "Oriental" },
+    {
+      comida: "Lasanha",
+      preco: 30,
+      acompanhamento: "Salada Verde",
+      tipo: "Massa",
+    },
+    { comida: "Tacos", preco: 25, tipo: "Mexicana" },
+    {
+      comida: "Churrasco",
+      preco: 50,
+      acompanhamento: "Farofa",
+      tipo: "Brasileira",
+    },
+    { comida: "Feijoada", preco: 38, tipo: "Brasileira" },
+    {
+      comida: "Strogonoff",
+      preco: 32,
+      acompanhamento: "Batata Palha",
+      tipo: "Brasileira",
+    },
+    {
+      comida: "Nhoque",
+      preco: 27,
+      acompanhamento: "Molho de tomate",
+      tipo: "Massa",
+    },
+    { comida: "Yakissoba", preco: 29, tipo: "Oriental" },
   ];
 
-  // Geração de todas as chaves únicas presentes nos objetos do array.
-  // Isso garante que, mesmo se o primeiro item não tiver todas as colunas, elas ainda aparecerão.
-  const colunasDinamicas = [...new Set(
-    dados.flatMap(obj => Object.keys(obj)) // flatMap pega todas as chaves de todos os objetos
-  )];
+  // Estado do filtro e modo
+  const [tiposSelecionados, setTiposSelecionados] = useState([]);
+  const [modoMultiplo, setModoMultiplo] = useState(true);
+
+  // Opções únicas de tipo para o MultiSelect
+  const opcoesTipo = [...new Set(dados.map((d) => d.tipo))].map((tipo) => ({
+    label: tipo,
+    value: tipo,
+  }));
+
+  // Alternar entre modo único e múltiplo
+  const alternarModo = () => {
+    const novoModo = !modoMultiplo;
+    setModoMultiplo(novoModo);
+    if (!novoModo && tiposSelecionados.length > 1) {
+      // Se mudar para modo único, mantém apenas o último selecionado
+      setTiposSelecionados([tiposSelecionados.at(-1)]);
+    }
+  };
+
+  // Filtrar os dados com base nos tipos selecionados
+  const dadosFiltrados =
+    tiposSelecionados.length === 0
+      ? dados
+      : dados.filter((item) => tiposSelecionados.includes(item.tipo));
+
+  // Gerar todas as colunas dinamicamente
+  const colunasDinamicas = [
+    ...new Set(dados.flatMap((obj) => Object.keys(obj))),
+  ];
 
   return (
-    <div className="card">
-      <h3>Tabela de Comidas (colunas automáticas)</h3>
+    <div className="card flex flex-column gap-4">
+      <h3>Filtro por Tipo:</h3>
 
-      {/* DataTable é o componente de tabela do PrimeReact */}
+      <div className="flex flex-column gap-2 md:w-20rem">
+        <Button
+          label={`Modo: ${modoMultiplo ? "Múltiplo" : "Único"}`}
+          onClick={alternarModo}
+        />
+
+        <MultiSelect
+          value={tiposSelecionados}
+          options={opcoesTipo}
+          onChange={(e) => {
+            const valor = e.value || [];
+            setTiposSelecionados(modoMultiplo ? valor : valor.slice(-1));
+          }}
+          placeholder="Selecione tipos"
+          display="chip"
+          filter
+          className="w-full"
+        />
+      </div>
+
       <DataTable
-        value={dados}                  // Array de dados a ser exibido
-        paginator                     // Ativa paginação automática
-        rows={5}                      // Número de linhas por página
-        className="w-full"           // Ocupa toda a largura do container
-        responsiveLayout="scroll"    // Permite scroll horizontal em telas menores
+        value={dadosFiltrados}
+        paginator
+        rows={5}
+        className="w-full"
+        responsiveLayout="scroll"
       >
-
-        {/* Aqui, cada chave única se transforma em uma coluna automaticamente */}
         {colunasDinamicas.map((chave) => (
           <Column
-            key={chave} // Chave única exigida pelo React
-            field={chave} // Nome da propriedade no objeto
-            header={chave.charAt(0).toUpperCase() + chave.slice(1)} // Capitaliza o nome do header
+            key={chave}
+            field={chave}
+            header={chave.charAt(0).toUpperCase() + chave.slice(1)}
           />
         ))}
       </DataTable>
@@ -50,5 +122,4 @@ const TabelaComidas = () => {
   );
 };
 
-// Exporta o componente para uso em outro lugar do app
 export default TabelaComidas;
