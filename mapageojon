@@ -1,0 +1,295 @@
+import React, { useEffect, useRef, useState } from "react"; 
+// Importa React e hooks necessários: useEffect (efeitos colaterais), useRef (referência ao DOM), useState (estado do componente)
+
+import * as echarts from "echarts"; 
+// Importa toda a biblioteca ECharts para criar gráficos e mapas
+
+export default function BrazilMap() { 
+  // Define o componente funcional chamado BrazilMap
+  const chartRef = useRef(null); 
+  // Cria uma referência ao div que vai conter o gráfico
+
+  const [mode, setMode] = useState("region"); // "region" | "marketing"
+  // Estado que define se o gráfico mostra vendas por região ou por grupo de marketing
+
+  useEffect(() => { 
+    // Hook que executa código após o componente ser montado (ou quando 'mode' mudar)
+    const chart = echarts.init(chartRef.current); 
+    // Inicializa o gráfico ECharts dentro do div referenciado
+
+    fetch(
+      "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
+    )
+      .then((res) => res.json()) 
+      // Converte a resposta em JSON (GeoJSON dos estados do Brasil)
+      .then((geoJson) => { 
+        echarts.registerMap("BR", geoJson); 
+        // Registra o mapa com o nome "BR" no ECharts usando o GeoJSON
+
+        // -----------------------------
+        // Mapeamento estados -> regiões
+        // -----------------------------
+        const stateToRegion = {
+          Acre: "Norte",
+          Amazonas: "Norte",
+          Roraima: "Norte",
+          Amapá: "Norte",
+          Rondônia: "Norte",
+          Pará: "Norte",
+          Tocantins: "Norte",
+
+          Maranhão: "Nordeste",
+          Piauí: "Nordeste",
+          Ceará: "Nordeste",
+          "Rio Grande do Norte": "Nordeste",
+          Paraíba: "Nordeste",
+          Pernambuco: "Nordeste",
+          Alagoas: "Nordeste",
+          Sergipe: "Nordeste",
+          Bahia: "Nordeste",
+
+          "Mato Grosso": "Centro-Oeste",
+          "Mato Grosso do Sul": "Centro-Oeste",
+          Goiás: "Centro-Oeste",
+          "Distrito Federal": "Centro-Oeste",
+
+          "São Paulo": "Sudeste",
+          "Minas Gerais": "Sudeste",
+          "Espírito Santo": "Sudeste",
+          "Rio de Janeiro": "Sudeste",
+
+          Paraná: "Sul",
+          "Santa Catarina": "Sul",
+          "Rio Grande do Sul": "Sul",
+        }; 
+        // Objeto que mapeia cada estado para a sua região oficial
+
+        // -----------------------------
+        // Mapeamento estados -> grupos marketing
+        // -----------------------------
+        const stateToMarketing = {
+          "São Paulo": "São Paulo",
+          "Minas Gerais": "Sudeste - exceto SP",
+          "Rio de Janeiro": "Sudeste - exceto SP",
+          "Espírito Santo": "Sudeste - exceto SP",
+
+          Paraná: "Sul",
+          "Santa Catarina": "Sul",
+          "Rio Grande do Sul": "Sul",
+
+          Acre: "Norte",
+          Amazonas: "Norte",
+          Roraima: "Norte",
+          Amapá: "Norte",
+          Rondônia: "Norte",
+          Pará: "Norte",
+          Tocantins: "Norte",
+
+          Maranhão: "Nordeste",
+          Piauí: "Nordeste",
+          Ceará: "Nordeste",
+          "Rio Grande do Norte": "Nordeste",
+          Paraíba: "Nordeste",
+          Pernambuco: "Nordeste",
+          Alagoas: "Nordeste",
+          Sergipe: "Nordeste",
+          Bahia: "Nordeste",
+
+          "Mato Grosso": "Centro-Oeste",
+          "Mato Grosso do Sul": "Centro-Oeste",
+          Goiás: "Centro-Oeste",
+          "Distrito Federal": "Centro-Oeste",
+        }; 
+        // Objeto que mapeia cada estado para o grupo de marketing correspondente
+
+        // -----------------------------
+        // Vendas fictícias
+        // -----------------------------
+        const salesRegion = {
+          Norte: 120,
+          Nordeste: 300,
+          "Centro-Oeste": 150,
+          Sudeste: 500,
+          Sul: 220,
+        }; 
+        // Valores de vendas fictícios por região
+
+        const salesMarketing = {
+          "São Paulo": 200,
+          "Sudeste - exceto SP": 300,
+          Sul: 220,
+          Norte: 120,
+          Nordeste: 300,
+          "Centro-Oeste": 150,
+        }; 
+        // Valores de vendas fictícios por grupo de marketing
+
+        // -----------------------------
+        // Cores fixas
+        // -----------------------------
+        const regionColors = {
+          Norte: "#1f77b4",
+          Nordeste: "#ff7f0e",
+          "Centro-Oeste": "#2ca02c",
+          Sudeste: "#d62728",
+          Sul: "#9467bd",
+        }; 
+        // Cores atribuídas a cada região
+
+        const marketingColors = {
+          "São Paulo": "#e41a1c",
+          "Sudeste - exceto SP": "#377eb8",
+          Sul: "#4daf4a",
+          Norte: "#984ea3",
+          Nordeste: "#ff7f00",
+          "Centro-Oeste": "#a65628",
+        }; 
+        // Cores atribuídas a cada grupo de marketing
+
+        // -----------------------------
+        // Função que gera os dados para o mapa
+        // -----------------------------
+        const buildData = (mode) => { 
+          const data = []; 
+          for (const state in stateToRegion) { 
+            const group =
+              mode === "region"
+                ? stateToRegion[state]
+                : stateToMarketing[state]; 
+            // Escolhe o grupo correto dependendo do modo
+
+            const value =
+              mode === "region" ? salesRegion[group] : salesMarketing[group]; 
+            // Pega o valor de vendas correspondente ao grupo
+
+            const color =
+              mode === "region" ? regionColors[group] : marketingColors[group]; 
+            // Pega a cor correta para o grupo
+
+            data.push({
+              name: state, 
+              // Nome do estado
+              value, 
+              // Valor a ser mostrado no tooltip
+              itemStyle: { areaColor: color }, 
+              // Define a cor do estado no mapa
+            }); 
+          }
+          return data; 
+          // Retorna array de objetos com nome, valor e cor de cada estado
+        };
+
+        // -----------------------------
+        // Configuração inicial do gráfico
+        // -----------------------------
+        chart.setOption({
+          tooltip: { trigger: "item", formatter: "{b}: {c}" }, 
+          // Tooltip ao passar o mouse: {b} = nome do estado, {c} = valor
+          series: [
+            {
+              type: "map", 
+              // Tipo de série: mapa
+              map: "BR", 
+              // Usa o mapa registrado como "BR"
+              roam: true, 
+              // Permite zoom e pan
+              label: { show: true, fontSize: 8 }, 
+              // Mostra nomes dos estados com fonte pequena
+              data: buildData(mode), 
+              // Dados do mapa (valores e cores)
+            },
+          ],
+        });
+
+        // Atualiza o mapa sempre que mudar o modo
+        const updateChart = () => {
+          chart.setOption({
+            series: [{ data: buildData(mode) }], 
+            // Atualiza os dados do gráfico sem recriar tudo
+          });
+        };
+
+        updateChart(); 
+        // Chama a função para inicializar o gráfico
+
+        return () => chart.dispose(); 
+        // Limpa o gráfico quando o componente é desmontado
+      });
+  }, [mode]); 
+  // O useEffect roda novamente sempre que 'mode' muda
+
+  // -----------------------------
+  // Função para renderizar legenda
+  // -----------------------------
+  const renderLegend = () => {
+    const regionColors = {
+      Norte: "#1f77b4",
+      Nordeste: "#ff7f0e",
+      "Centro-Oeste": "#2ca02c",
+      Sudeste: "#d62728",
+      Sul: "#9467bd",
+    }; 
+    // Mesmas cores definidas para regiões
+
+    const marketingColors = {
+      "São Paulo": "#e41a1c",
+      "Sudeste - exceto SP": "#377eb8",
+      Sul: "#4daf4a",
+      Norte: "#984ea3",
+      Nordeste: "#ff7f00",
+      "Centro-Oeste": "#a65628",
+    }; 
+    // Mesmas cores definidas para grupos de marketing
+
+    const colors = mode === "region" ? regionColors : marketingColors; 
+    // Escolhe quais cores usar de acordo com o modo
+
+    return (
+      <div className="flex flex-wrap gap-4 mt-4"> 
+        {/* Container da legenda */}
+        {Object.entries(colors).map(([label, color]) => (
+          <div key={label} className="flex items-center gap-2">
+            {/* Cada item da legenda */}
+            <div
+              style={{
+                width: 16,
+                height: 16,
+                backgroundColor: color, 
+                border: "1px solid #333",
+              }}
+            />
+            <span>{label}</span> 
+            {/* Nome da região ou grupo */}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4">
+        {/* Botões para alternar modo */}
+        <button
+          onClick={() => setMode("region")}
+          className="p-2 bg-blue-500 text-white rounded"
+        >
+          Vendas por Região
+        </button>
+        <button
+          onClick={() => setMode("marketing")}
+          className="p-2 bg-green-500 text-white rounded"
+        >
+          Vendas por Marketing
+        </button>
+      </div>
+
+      <div ref={chartRef} style={{ width: "100%", height: "600px" }} />
+      {/* Div onde o gráfico será renderizado */}
+
+      {/* Legenda */}
+      {renderLegend()}
+      {/* Renderiza a legenda manual com cores e nomes */}
+    </div>
+  );
+}
