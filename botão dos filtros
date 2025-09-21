@@ -1,0 +1,88 @@
+import React, { useState } from "react";
+import { Accordion, AccordionTab } from "primereact/accordion";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+
+export default function CaixaAccordion() {
+  // estado que guarda os valores digitados nas 9 caixas
+  const [inputs, setInputs] = useState(Array(9).fill(""));
+
+  // estado que guarda os dados confirmados
+  const [finalData, setFinalData] = useState(null);
+
+  // função chamada ao digitar em uma caixa
+  const handleChange = (index, value) => {
+    const updated = [...inputs];
+    updated[index] = value;
+    setInputs(updated);
+  };
+
+  // verifica se todas as caixas já estão preenchidas
+  const allFilled = inputs.every((val) => val.trim() !== "");
+
+  // chamada ao clicar no botão Confirmar
+  const handleConfirm = () => {
+    if (allFilled) {
+      setFinalData(inputs);
+      alert("Dados confirmados!");
+    } else {
+      alert("Preencha todas as caixas antes de confirmar!");
+    }
+  };
+
+  // função para limpar todas as caixas
+  const handleClear = () => {
+    setInputs(Array(9).fill("")); // reseta o estado das caixas
+    setFinalData(null); // limpa os dados confirmados também
+  };
+
+  return (
+    <div className="card">
+      {/* Accordion começa fechado */}
+      <Accordion activeIndex={null}>
+        <AccordionTab header="Formulário">
+          <div className="p-fluid grid">
+            {/* gera dinamicamente 9 caixas de texto */}
+            {inputs.map((val, i) => (
+              <div key={i} className="col-12 md:col-4 mb-3">
+                <InputText
+                  value={val}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  placeholder={`Caixa ${i + 1}`}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Botões */}
+          <div className="mt-2 flex gap-2">
+            <Button
+              label="Confirmar"
+              icon="pi pi-check"
+              onClick={handleConfirm}
+              disabled={!allFilled}
+            />
+            <Button
+              label="Limpar"
+              icon="pi pi-times"
+              onClick={handleClear}
+              className="p-button-secondary"
+            />
+          </div>
+        </AccordionTab>
+      </Accordion>
+
+      {/* Mostra os dados confirmados */}
+      {finalData && (
+        <div className="mt-3">
+          <h4>Dados confirmados:</h4>
+          <ul>
+            {finalData.map((d, i) => (
+              <li key={i}>{d}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
