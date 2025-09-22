@@ -1,0 +1,21 @@
+src/main/java/com/exemplo/demo/
+│
+├── DemoApplication.java           # classe principal do Spring Boot
+│
+├── model/                         # entidades do banco
+│   └── Usuario.java
+│
+├── repository/                    # repositórios JPA
+│   └── UsuarioRepository.java
+│
+├── controller/                    # controllers REST
+│   └── AuthController.java
+│
+├── security/                      # classes de segurança e JWT
+│   └── JwtUtil.java
+│
+├── service/                       # serviços (opcional, para lógica de negócio)
+│   └── UsuarioService.java (opcional)
+│
+└── config/                        # configs Spring Security, filtros etc.
+    └── SecurityConfig.java (se for usar Spring Security completo)
