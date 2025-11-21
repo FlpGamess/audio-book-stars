@@ -84,3 +84,55 @@ const exportarExcel = async () => {
   a.click();
   a.remove();
 };
+
+
+
+@GetMapping("/exportar-excel")
+public ResponseEntity<byte[]> exportarExcel(
+        @RequestParam(required = false) String parametro1,
+        @RequestParam(required = false) String parametro2
+) throws IOException {
+
+    XSSFWorkbook workbook = new XSSFWorkbook();
+    XSSFSheet sheet = workbook.createSheet("Dados");
+
+    int rowNum = 0;
+
+    // Cabeçalho
+    Row header = sheet.createRow(rowNum++);
+    header.createCell(0).setCellValue("ID");
+    header.createCell(1).setCellValue("Nome");
+    header.createCell(2).setCellValue("Valor");
+
+    int page = 0;
+    int pageSize = 10;
+
+    Page<MinhaEntidade> resultado;
+
+    do {
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        resultado = repository.findByFiltros(parametro1, parametro2, pageable);
+
+        for (MinhaEntidade item : resultado.getContent()) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(item.getId());
+            row.createCell(1).setCellValue(item.getNome());
+            row.createCell(2).setCellValue(item.getValor());
+        }
+
+        page++;
+
+    } while (!resultado.isLast());
+
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    workbook.write(stream);
+    workbook.close();
+
+    byte[] excel = stream.toByteArray();
+
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=dados.xlsx")
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(excel);
+}
