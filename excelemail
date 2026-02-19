@@ -1,0 +1,61 @@
+Sub EnviarEmailComPrint()
+
+    Dim OutApp As Object
+    Dim OutMail As Object
+    Dim caminhoImagem As String
+    Dim rng As Range
+    
+    Dim emailDestino As String
+    Dim assuntoEmail As String
+    Dim corpoEmail As String
+    
+    ' Definir planilha
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Planilha1")
+    
+    ' Pegar dados das células
+    emailDestino = ws.Range("B1").Value
+    assuntoEmail = ws.Range("B2").Value
+    corpoEmail = ws.Range("B3").Value
+    
+    ' Verificação simples
+    If emailDestino = "" Then
+        MsgBox "Email destino não informado!", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Definir intervalo para "print"
+    Set rng = ws.Range("A1:F20")
+    
+    ' Caminho temporário da imagem
+    caminhoImagem = Environ("TEMP") & "\print_excel.png"
+    
+    ' Copiar como imagem
+    rng.CopyPicture Appearance:=xlScreen, Format:=xlPicture
+    
+    ' Criar gráfico temporário para salvar imagem
+    With ws.ChartObjects.Add(0, 0, rng.Width, rng.Height)
+        .Chart.Paste
+        .Chart.Export caminhoImagem, "PNG"
+        .Delete
+    End With
+    
+    ' Criar Outlook
+    Set OutApp = CreateObject("Outlook.Application")
+    Set OutMail = OutApp.CreateItem(0)
+    
+    With OutMail
+        .To = emailDestino
+        .Subject = assuntoEmail
+        .Body = corpoEmail
+        .Attachments.Add caminhoImagem
+        
+        .Display   'Use .Send quando quiser enviar automático
+    End With
+    
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+    
+    MsgBox "Email preparado com sucesso!"
+
+End Sub
